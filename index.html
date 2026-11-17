@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>生態館</title>
+<style>
+:root{--panel:rgba(8,16,24,.84);--line:rgba(255,255,255,.12);--txt:#eaf2f6;--mut:#94a8b4;--acc:#6fd3ff;--warn:#ffc46b;--bad:#ff7d6d}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:#05080b;color:var(--txt);font-family:-apple-system,"PingFang TC","Noto Sans TC",system-ui,sans-serif;overflow:hidden;-webkit-user-select:none;user-select:none}
+#c{position:fixed;inset:0;display:block;touch-action:none}
+.vig{position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 58%,rgba(0,0,0,.42) 100%)}
+.top{position:fixed;top:0;left:0;right:0;padding:10px 10px 0;pointer-events:none}
+.chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;pointer-events:auto}
+.chips::-webkit-scrollbar{display:none}
+.chip{border:1px solid var(--line);background:var(--panel);color:var(--txt);padding:7px 11px;border-radius:999px;font-size:12.5px;white-space:nowrap;font-family:inherit;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.chip.on{background:var(--acc);color:#04202e;font-weight:650;border-color:transparent}
+.card{position:fixed;top:52px;left:10px;width:262px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:11px 12px;font-size:12.5px;line-height:1.5;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:none}
+.card input{width:100%;font-size:16px;font-weight:650;background:transparent;border:none;border-bottom:1px dashed rgba(255,255,255,.25);color:var(--txt);padding:2px 0;font-family:inherit;-webkit-user-select:text;user-select:text}
+.card .sp{color:var(--mut);font-size:11.5px;margin-top:3px}.card .sz{color:var(--acc);margin-top:4px}.card .f{color:#c9d6dd;margin-top:4px}
+.lbl{display:flex;justify-content:space-between;color:var(--mut);margin:7px 0 3px}
+.bars{height:6px;background:rgba(255,255,255,.12);border-radius:3px;overflow:hidden;margin:4px 0}
+.bars i{display:block;height:100%;border-radius:3px;transition:width .3s}
+.tip{color:var(--warn);margin-top:6px}
+.x{position:absolute;top:6px;right:8px;background:none;border:none;color:var(--mut);font-size:16px}
+#bar{position:fixed;left:8px;right:8px;bottom:8px;max-width:560px;margin:0 auto;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:9px 10px 9px 12px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:none}
+#bar .row{display:flex;align-items:center;gap:7px}
+#bT{font-size:14.5px;font-weight:650}#bD{font-size:11.5px;color:var(--mut);margin-top:1px}
+#bB{display:flex;gap:6px}
+.btn{border:1px solid var(--line);background:rgba(255,255,255,.07);color:var(--txt);padding:8px 11px;border-radius:10px;font-size:13px;font-family:inherit;white-space:nowrap}
+.btn.feed{background:var(--warn);color:#2a1a04;font-weight:700;border-color:transparent}
+.btn.sm{padding:5px 9px;font-size:12px}
+.btn.dis{opacity:.4}
+.btn.danger{border-color:rgba(255,125,109,.5);color:var(--bad);width:100%}
+#sheet{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:flex-end;justify-content:center}
+#sheet.open{display:flex}
+.sh{width:100%;max-width:560px;max-height:78vh;overflow-y:auto;background:#0c1720;border:1px solid var(--line);border-radius:18px 18px 0 0;padding:14px 14px 22px;position:relative}
+.sh h3{margin:2px 0 10px;font-size:17px}
+.sh h4{margin:14px 0 6px;font-size:13px;color:var(--mut);font-weight:600}
+.sh input{width:100%;font-size:15px;background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:8px 10px;margin-top:4px;font-family:inherit;-webkit-user-select:text;user-select:text}
+.opt{display:flex;flex-direction:column;gap:3px;text-align:left;width:100%;margin-bottom:8px;border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--txt);border-radius:12px;padding:11px 12px;font-family:inherit;font-size:13px}
+.opt b{font-size:15px}
+.mut{color:var(--mut)}.sm{font-size:11.5px}
+.res{display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px}
+.res .bars,.res .sm{grid-column:1}.res button{grid-column:2;grid-row:1/4}
+.adds{display:flex;flex-wrap:wrap;gap:6px}
+.envrow{display:flex;align-items:center;gap:10px;margin:6px 0;font-size:13px}.envrow input{flex:1;accent-color:var(--acc);margin:0}
+.row2{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line);font-size:13px}
+#joy{position:fixed;width:110px;height:110px;margin:-55px 0 0 -55px;border-radius:50%;border:2px solid rgba(255,255,255,.25);background:rgba(255,255,255,.06);display:none;pointer-events:none}
+#joy i{position:absolute;left:50%;top:50%;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;background:rgba(255,255,255,.35)}
+.toast{position:fixed;left:50%;top:54px;transform:translateX(-50%);background:rgba(4,10,16,.92);border:1px solid var(--line);padding:9px 14px;border-radius:12px;font-size:13px;opacity:0;transition:opacity .35s;pointer-events:none;max-width:90vw;text-align:center}
+.toast.show{opacity:1}
+#err{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:30px;text-align:center;color:var(--mut);background:#05080b}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div class="vig"></div>
+<div class="top"><div class="chips" id="chips"></div></div>
+<div class="card" id="pick"><button class="x" id="pX">✕</button>
+  <input id="pName" maxlength="16" aria-label="名字">
+  <div class="sp" id="pSp"></div><div class="sz" id="pZ"></div>
+  <div class="lbl"><span id="pSt"></span><span id="pBond" style="color:#ff8aa5;letter-spacing:1px"></span></div>
+  <div class="lbl"><span>飽食度</span><span id="pHt"></span></div><div class="bars"><i id="pH"></i></div>
+  <div class="lbl"><span>心情</span><span id="pMt"></span></div><div class="bars"><i id="pM"></i></div>
+  <div class="tip" id="pTip"></div><div style="display:flex;gap:6px;margin-top:7px"><button class="btn" id="pAct" style="flex:1">互動 ♥</button><button class="btn" id="pMove">轉缸</button><button class="btn" id="pSell">賣出</button></div><div class="f" id="pF"></div>
+</div>
+<div id="bar"><div class="row"><div style="flex:1;min-width:0"><div id="bT"></div><div id="bD"></div></div><div id="bB"></div></div></div>
+<div id="sheet"><div class="sh"><button class="x" id="shX">✕</button><h3 id="shT"></h3><div id="shC"></div></div></div>
+<div id="joy"><i></i></div>
+<button id="zoomBtn" class="chip" style="position:fixed;right:10px;bottom:84px">🔍 1x</button>
+<button id="rideBtn" class="btn feed" style="position:fixed;left:50%;transform:translateX(-50%);bottom:20px;display:none;padding:12px 22px">🛶 下船</button>
+<div class="toast" id="toast"></div>
+<div id="err">3D 引擎載入失敗，請檢查網路後重新整理。</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>if(!window.THREE)document.getElementById('err').style.display='flex';</script>
+<script src="a.js"></script>
+<script src="b.js"></script>
+<script src="c.js"></script>
+<script src="d.js"></script>
+<script src="e.js"></script>
+<script src="f.js"></script>
+<script src="g.js"></script>
+<script src="h.js"></script>
+<script src="i.js"></script>
+<script src="j.js"></script>
+<script src="k.js"></script>
+<script src="l.js"></script>
+<script src="m.js"></script>
+<script src="n.js"></script>
+<script src="o.js"></script>
+<script src="p.js"></script>
+<script src="q.js"></script>
+<script src="r.js"></script>
+</body>
+</html>

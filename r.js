@@ -18,7 +18,8 @@ function reelPat(dt,t){const p=FS.pat||'steady';if(FS.burst>0)FS.burst-=dt;
  if(p==='rush'){FS.bt2-=dt;if(FS.bt2<=0){FS.burst=.45;FS.bt2=rnd(.9,1.9);vib(40);}}
  else if(p==='zigzag'){FS.zt-=dt;if(FS.zt<=0){FS.dir*=-1;FS.zt=rnd(.25,.65);}}
  else if(p==='dive'){FS.zc+=FS.zd*dt*.22;if(FS.zc<FS.zw/2){FS.zc=FS.zw/2;FS.zd=1;}if(FS.zc>1-FS.zw/2){FS.zc=1-FS.zw/2;FS.zd=-1;}setZone();}
- else if(p==='heavy'&&FS.hits>0&&FS.zw>.12&&!FS._hs){FS._hs=1;}}
+ else if(p==='heavy'&&FS.hits>0&&FS.zw>.12&&!FS._hs){FS._hs=1;}
+ if(FS.pos<.1)FS.dir=1;else if(FS.pos>.9)FS.dir=-1;}
 const _hk=hook;hook=function(){_hk();if(FS&&FS.st==='reel')initPat();};
 const _rt=reelTap;reelTap=function(){const h=FS&&FS.hits;_rt();if(FS&&FS.st==='reel'&&FS.pat==='heavy'&&FS.hits>h){FS.zw*=.9;setZone();}};
 
@@ -181,5 +182,30 @@ async function gbBox(c){const box=document.createElement('div');box.innerHTML='<
  box.innerHTML='<div style="margin:14px 0 6px"><b>📬 訪客留言板</b></div>'+(got.map(it=>`<div class="row2"><span>${ic[it.k]||'•'} <b>${esc(String(it.nick||'玩家'))}</b> <span class="mut sm">${it.k==='like'?'按了讚':it.k==='gift'?'送了 '+fmt$(it.v||0):esc(String(it.m||''))}</span></span><span class="mut sm">${agoT(now-it.t)}</span></div>`).join('')||'<div class="mut sm">還沒有人來過，請朋友來參觀吧！</div>');}
 if(!window.claude&&!VISIT){setTimeout(gbCheck,12000);setInterval(gbCheck,180000);}
 
+/* ---------- 出航／入場費、拿掉放大鏡、多種釣竿 ---------- */
+const TRIP={sea:[600,'⛵ 租船出航'],stream:[250,'🎫 溪釣入山'],lake:[300,'🛶 租木棧位'],pier:[450,'🎫 堤防夜釣'],ice:[500,'🎫 冰湖門票'],mangrove:[400,'🛶 紅樹林導覽船']};
+const tripOf=k=>TRIP[k]||[300,'🎫 入場'];
+const _gf=goFish;goFish=function(k){if(curW()===k){_gf(k);return;}const [fee,nm]=tripOf(k);if(!pay(fee,nm))return;_gf(k);setTimeout(()=>toast(`${nm}：付了 ${fmt$(fee)}`,2400),2300);};
+{const zb=document.getElementById('zoomBtn');if(zb)zb.style.display='none';if(typeof ZOOM!=='undefined'&&ZOOM!==1){ZOOM=1;try{resize();}catch(e){}}}
+const ROD2={
+ std:{n:'🎋 標準竿',d:'什麼釣場都能用，沒有特別加成',cost:0,col:null},
+ iso:{n:'🪨 磯釣竿',d:'海釣、堤防：判定區 ×1.2；可失誤 +1',cost:3000,col:0x2f6b4f,at:['sea','pier'],zw:1.2,line:1},
+ ul:{n:'🌿 溪流短竿',d:'溪釣、湖釣、紅樹林：判定區 ×1.35；海邊 ×0.9',cost:2500,col:0x7a5a2a,at:['stream','lake','mangrove'],zw:1.35,off:.9},
+ glow:{n:'🌙 夜光竿',d:'夜間堤防、冰釣：游標變慢 ×0.8，判定區 ×1.15',cost:3500,col:0x3fd8c8,at:['pier','ice'],v:.8,zw:1.15},
+ lure:{n:'⚡ 路亞竿',d:'所有釣場：游標變慢 ×0.88；但判定區 ×0.92',cost:4500,col:0xe0662a,v:.88,zw:.92},
+ heavy:{n:'⚓ 重型船竿',d:'Boss 和沉重型的魚：少拉 1 次、判定區 ×1.25',cost:8000,col:0x1a1a2a,boss:1},
+ carbon:{n:'✨ 碳纖維旗艦竿',d:'所有釣場：判定區 ×1.15、游標 ×0.9、可失誤 +1',cost:20000,col:0xc8c8d8,zw:1.15,v:.9,line:1}};
+const rodNow=()=>ROD2[S.rodSel]||ROD2.std;
+const _fgv=fgv;fgv=function(k){let v=_fgv(k);const r=rodNow(),w=FS&&FS.w;const here=!r.at||(w&&r.at.includes(w));
+ if(k==='rod'){if(r.zw&&here)v*=r.zw;else if(r.off&&!here)v*=r.off;}
+ else if(k==='reel'){if(r.v&&here)v*=r.v;}
+ else if(k==='line'){if(r.line&&here)v+=r.line;}return v;};
+const _hk3=hook;hook=function(){_hk3();if(FS&&FS.st==='reel'&&rodNow().boss&&(FS.boss||FS.pat==='heavy')){FS.need=Math.max(2,FS.need-1);FS.zw=Math.min(.6,FS.zw*1.25);try{setZone();}catch(e){}fSub(`⚓ 重型船竿：只要拉中 ${FS.need} 次`);}};
+const _oc=openCast;openCast=function(){_oc();const r=rodNow();if(r.col!=null)rodM.color.set(r.col);};
+const _gs=gearSheet;gearSheet=function(){_gs();const c=$('#shC');S.rods=S.rods||{std:1};const sel=S.rodSel||'std';const d=document.createElement('div');
+ d.innerHTML='<h4 style="margin:12px 0 4px">🎣 釣竿收藏（選一支帶出門）</h4><div class="mut sm" style="margin-bottom:6px">上面的「釣竿等級」是基本強度，這裡選的竿子會再加上特殊效果。</div>'+Object.entries(ROD2).map(([k,r])=>`<div class="res"><div><b>${r.n}</b> ${k===sel?'<span style="color:var(--acc)">使用中</span>':''}</div><div class="mut sm">${r.d}</div>${S.rods[k]?(k===sel?'<span></span>':`<button class="btn sm" data-rs="${k}">換上</button>`):`<button class="btn sm" data-rb="${k}">買 ${fmt$(r.cost)}</button>`}</div>`).join('');
+ c.appendChild(d);d.querySelectorAll('[data-rs]').forEach(b=>b.onclick=()=>{S.rodSel=b.dataset.rs;markDirty();toast('換上 '+ROD2[S.rodSel].n);gearSheet();});
+ d.querySelectorAll('[data-rb]').forEach(b=>b.onclick=()=>{const k=b.dataset.rb,r=ROD2[k];if(!pay(r.cost,r.n))return;S.rods[k]=1;S.rodSel=k;markDirty();toast(`🎉 買了 ${r.n}，已經換上`,2600);gearSheet();});};
+
 if(typeof S!=='undefined')setInterval(()=>{if(S.inf){S.inf=false;markDirty();updMoney();}},3000);
-boot();
+

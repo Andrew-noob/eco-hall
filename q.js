@@ -131,7 +131,7 @@ function fBtns(list){const b=$('#fB');b.innerHTML='';for(const [t,f,c,fast] of l
 const waveY=(x,z,t)=>Math.sin(x*.08+t*.9)*.22+Math.sin((z-seaOff)*.11+t*1.25)*.16;
 function curW(){for(const k in FW){const a=FW[k].area;if(player.x>a[0]-2&&player.x<a[1]+2&&player.z>a[2]-2&&player.z<a[3]+2)return k;}return null;}
 function tabOf(k){return k==='sea'?SEAZ[S.seaZ||'near'].tab:FW[k].tab;}
-function fishMenu(){sheet('🎣 去釣魚',`<div class="mut sm">選一個釣場傳送過去。</div>`+Object.entries(FW).map(([k,w])=>`<button class="opt" data-w="${k}"><b>${w.n}</b><span class="mut">${w.d}</span></button>`).join(''),c=>c.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>{goFish(b.dataset.w);$('#sheet').classList.remove('open');}));}
+function fishMenu(){sheet('🎣 去釣魚',`<div class="mut sm">選一個釣場傳送過去。</div>`+Object.entries(FW).map(([k,w])=>`<button class="opt" data-w="${k}"><b>${w.n} <span class="mut sm">${tripOf(k)[1]} ${fmt$(tripOf(k)[0])}</span></b><span class="mut">${w.d}</span></button>`).join(''),c=>c.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>{goFish(b.dataset.w);$('#sheet').classList.remove('open');}));}
 function goFish(k){if(!curW())RET={x:player.x,y:player.y,z:player.z,yaw:player.yaw};endFish();const w=FW[k];Object.assign(player,{x:w.stand[0],y:0,z:w.stand[2],yaw:w.yaw,pitch:-.18});toast(`${w.n}・天氣：${wxNow(k)}`,2200);}
 function goHome(){endFish();const r=RET||{x:0,y:0,z:38.5,yaw:0};Object.assign(player,{x:r.x,y:r.y,z:r.z,yaw:r.yaw,pitch:0});RET=null;toast('🏠 回到生態館',1800);}
 function endFish(msg){if(msg)toast(msg,2000);FS=null;fBob.visible=rod.visible=fline.visible=showM.visible=false;FU.style.display='none';ring.position.y=-100;}

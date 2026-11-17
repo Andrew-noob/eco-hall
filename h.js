@@ -13,16 +13,16 @@ const upv=k=>UPG[k].lv[((S.up&&S.up[k])||1)-1];
 const capOf=k=>Math.round(STOCKDEF[k].cap*upv('cap'));
 const cdOf=k=>STOCKDEF[k].cd*[1,.85,.7,.55,.4][((S.up&&S.up.yield)||1)-1];
 const fmt$=n=>'$'+Math.round(n).toLocaleString('en-US');
-function pay(n,what){ensureEco();if(S.inf){updMoney();return true;}if(S.money<n){toast(`金幣不夠：${what}要 ${fmt$(n)}，你有 ${fmt$(S.money)}。去倉庫賣餌料或賣出繁殖的寶寶吧`,3800);return false;}S.money-=n;markDirty();updMoney();return true;}
+function pay(n,what){ensureEco();if(S.inf){S.inf=false;markDirty();}if(S.money<n){toast(`金幣不夠：${what}要 ${fmt$(n)}，你有 ${fmt$(S.money)}。去倉庫賣餌料或賣出繁殖的寶寶吧`,3800);return false;}S.money-=n;markDirty();updMoney();return true;}
 function earn(n){ensureEco();S.money+=n;markDirty();updMoney();}
 function updMoney(){const c=document.getElementById('moneyChip');if(c)c.textContent=S.inf?'💰 ∞':'💰 '+fmt$(S.money||0);}
 
 /* ---------- 商店 ---------- */
 function order(sp){const p=PRICE[sp]||100;if(!pay(p,SP[sp].n))return;S.orders.push({sp,eta:Date.now()+upv('ship')*1000});toast(`🛒 已訂購 ${SP[sp].n}（${fmt$(p)}），約 ${upv('ship')} 秒後送達倉庫`,3200);}
-function shopSheet(tab='ani'){ensureEco();const tabs=`<div style="display:flex;gap:6px;margin-bottom:8px"><button class="chip ${tab==='ani'?'on':''}" data-t="ani">動物</button><button class="chip ${tab==='up'?'on':''}" data-t="up">設備升級</button></div><div class="row2" style="margin-bottom:6px"><span class="mut">持有 ${S.inf?'∞ 無限':fmt$(S.money)}</span><button class="btn sm" id="infT" style="${S.inf?'background:var(--acc);color:#04131c':''}">♾ 無限金錢：${S.inf?'開':'關'}</button></div>`;
+function shopSheet(tab='ani'){ensureEco();const tabs=`<div style="display:flex;gap:6px;margin-bottom:8px"><button class="chip ${tab==='ani'?'on':''}" data-t="ani">動物</button><button class="chip ${tab==='up'?'on':''}" data-t="up">設備升級</button></div><div class="row2" style="margin-bottom:6px"><span class="mut">持有 ${S.inf?'∞ 無限':fmt$(S.money)}</span></div>`;
  let body='';if(tab==='ani'){for(const [h,ht] of Object.entries(HT)){const list=Object.entries(SP).filter(([k,p])=>p.hab===h);if(!list.length)continue;body+=`<h4>${ht.n}</h4>`+list.map(([k,p])=>`<div class="row2"><span>${p.n} <span class="mut sm">${p.z.split('，')[0].split('（')[0]}</span></span><button class="btn sm ${!S.inf&&S.money<(PRICE[k]||100)?'dis':''}" data-b="${k}">${fmt$(PRICE[k]||100)}</button></div>`).join('');}}
  else body=Object.entries(UPG).map(([k,u])=>{const lv=S.up[k],max=u.lv.length,cur=u.fmt(u.lv[lv-1]),nx=lv<max?u.fmt(u.lv[lv]):null;return`<div class="res"><div><b>${u.n}</b> <span class="mut">Lv.${lv}/${max}</span></div><div class="mut sm">${u.d}</div><div class="sm">${cur}${nx?` → <span style="color:var(--acc)">${nx}</span>`:'（已滿級）'}</div>${nx?`<button class="btn sm ${!S.inf&&S.money<u.cost[lv]?'dis':''}" data-u="${k}">升級 ${fmt$(u.cost[lv])}</button>`:'<span></span>'}</div>`;}).join('');
- sheet('🛒 商店',tabs+body,c=>{c.querySelector('#infT').onclick=()=>{S.inf=!S.inf;markDirty();updMoney();toast(S.inf?'♾ 無限金錢已開啟：買東西、升級、基因編輯都免費':'無限金錢已關閉，回到原本的金幣',3000);shopSheet(tab);};c.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>shopSheet(b.dataset.t));c.querySelectorAll('[data-b]').forEach(b=>b.onclick=()=>{order(b.dataset.b);shopSheet('ani');});
+ sheet('🛒 商店',tabs+body,c=>{c.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>shopSheet(b.dataset.t));c.querySelectorAll('[data-b]').forEach(b=>b.onclick=()=>{order(b.dataset.b);shopSheet('ani');});
   c.querySelectorAll('[data-u]').forEach(b=>b.onclick=()=>{const k=b.dataset.u,u=UPG[k],lv=S.up[k];if(!pay(u.cost[lv],u.n))return;S.up[k]=lv+1;toast(`⬆ ${u.n} 升到 Lv.${lv+1}：${u.fmt(u.lv[lv])}`,3000);shopSheet('up');});});}
 
 /* ---------- 倉庫（待安置動物、運送中、庫存買賣） ---------- */

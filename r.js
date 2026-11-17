@@ -146,4 +146,5 @@ function importSave(){const i=document.createElement('input');i.type='file';i.st
   toast('📥 匯入完成，重新載入中…',3000);setTimeout(()=>location.reload(),900);};r.readAsText(f);};i.click();}
 const _ms4=mapSheet;mapSheet=function(){_ms4();const c=$('#shC'),d=document.createElement('div');d.style.cssText='display:flex;gap:6px;margin-top:6px';d.innerHTML='<button class="btn" style="flex:1" id="oEx">💾 匯出存檔</button><button class="btn" style="flex:1" id="oIm">📥 匯入存檔</button>';c.insertBefore(d,c.children[3]||null);d.querySelector('#oEx').onclick=exportSave;d.querySelector('#oIm').onclick=importSave;};
 
+if(typeof S!=='undefined')setInterval(()=>{if(S.inf){S.inf=false;markDirty();updMoney();}},3000);
 boot();

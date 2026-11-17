@@ -135,4 +135,15 @@ const _ms3=mapSheet;mapSheet=function(){_ms3();if(window.claude)return;const c=$
 if(!window.claude){setInterval(()=>cloudPush(false),15000);setInterval(presence,60000);setTimeout(presence,9000);
  document.addEventListener('visibilitychange',()=>{if(document.hidden)cloudPush(true);else presence();});addEventListener('pagehide',()=>cloudPush(true));}
 
+/* ---------- 存檔匯出／匯入 ---------- */
+function exportSave(){try{S.t=Date.now();const b=new Blob([JSON.stringify(S)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='生態館存檔.json';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},2000);toast('💾 存檔已下載');}catch(e){toast('匯出失敗');}}
+function importSave(){const i=document.createElement('input');i.type='file';i.style.display='none';document.body.appendChild(i);
+ i.onchange=()=>{const f=i.files&&i.files[0];i.remove();if(!f)return;const r=new FileReader();r.onload=async()=>{let d=null;try{d=JSON.parse(r.result);}catch(e){}
+  if(!d||!d.tanks){toast('這不是生態館的存檔檔案',3500);return;}let n=0;for(const k in d.tanks)n+=(d.tanks[k].animals||[]).length;
+  if(!confirm(`要匯入這個存檔嗎？\n裡面有 ${Object.keys(d.tanks).length} 個展缸、${n} 隻動物、$${d.money||0}\n（目前的進度會被取代）`))return;
+  d.t=Date.now();if(S.nick&&!d.nick)d.nick=S.nick;try{localStorage.setItem('museum-v2',JSON.stringify(d));}catch(e){}
+  if(cloudRef){try{await cloudRef.set({j:JSON.stringify(d),t:d.t,nick:d.nick||''});}catch(e){}}else if(docRef){try{await docRef.set(d);}catch(e){}}
+  toast('📥 匯入完成，重新載入中…',3000);setTimeout(()=>location.reload(),900);};r.readAsText(f);};i.click();}
+const _ms4=moreSheet;moreSheet=function(){_ms4();const c=$('#shC');for(const [h,s,f] of [['💾 匯出存檔','下載成檔案，備份或搬到別的地方',exportSave],['📥 匯入存檔','選一個存檔檔案，取代目前的進度',importSave]]){const b=document.createElement('button');b.className='opt';b.innerHTML=`<b>${h}</b><span class="mut">${s}</span>`;b.onclick=f;c.appendChild(b);}};
+
 boot();

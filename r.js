@@ -39,7 +39,7 @@ function wellSheet(){S.well=S.well||[];sheet('🐟 活魚艙',`<div class="mut s
  const a=c.querySelector('#wAll');if(a)a.onclick=()=>{for(const it of S.well)S.wh.push({sp:it.sp,g:it.g,sex:it.sex,name:it.name});S.well=[];markDirty();wellSync();toast('📦 全部送回倉庫');wellSheet();};});}
 const _lf=landFish;landFish=function(){_lf();const c=FS&&FS.catch;if(!c||BOSS[c.k])return lbPushSoon();
  if(FS.w==='sea'){const it={sp:c.k,g:c.g,sex:c.sex,cm:c.cm,name:`${c.g.m!=='n'?MORPH[c.g.m].pre+' ':''}${c.nm}`};
-  fBtns([['放活魚艙',()=>{S.well=S.well||[];if(S.well.length>=6){toast('活魚艙滿了（6 條），先到「🧰 更多 → 活魚艙」處理');return;}S.well.push(it);markDirty();wellSync();toast('🐟 放進活魚艙了，回頭看看牠在游');openCast();},'feed'],[`賣 ${fmt$(c.val)}`,()=>{earn(c.val);mktHit(c.k);toast(`💰 獲得 ${fmt$(c.val)}`);openCast();}],['放生',()=>{toast('🌊 放生了');openCast();}]]);}
+  fBtns([['放活魚艙',()=>{S.well=S.well||[];if(S.well.length>=(typeof boatNow==='function'?boatNow().well:6)){toast('活魚艙滿了，先到「🧰 更多 → 活魚艙」處理');return;}S.well.push(it);markDirty();wellSync();toast('🐟 放進活魚艙了，回頭看看牠在游');openCast();},'feed'],[`賣 ${fmt$(c.val)}`,()=>{earn(c.val);mktHit(c.k);toast(`💰 獲得 ${fmt$(c.val)}`);openCast();}],['放生',()=>{toast('🌊 放生了');openCast();}]]);}
  lbPushSoon();};
 const _ms=moreSheet;moreSheet=function(){_ms();if(curW()!=='sea')return;const c=$('#shC'),b=document.createElement('button');b.className='opt';b.innerHTML=`<b>🐟 活魚艙（${(S.well||[]).length}/6）</b><span class="mut">看船上養的魚，帶回倉庫或賣掉</span>`;b.onclick=wellSheet;c.insertBefore(b,c.firstChild);};
 

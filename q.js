@@ -112,7 +112,7 @@ function applyEnv(k){if(!k){hemi.intensity=L0.h;sunL.intensity=L0.s;scene.fog=nu
 /* ---------- 魚市行情（同一種魚賣越多越便宜，會慢慢回升） ---------- */
 function mktF(k){S.mkt=S.mkt||{};const m=S.mkt[k];if(!m)return 1;const f=Math.min(1,m.f+(Date.now()-m.t)/60000*.06);return f;}
 function mktHit(k){S.mkt=S.mkt||{};S.mkt[k]={f:Math.max(.3,mktF(k)*.85),t:Date.now()};markDirty();}
-const fishVal=(k,g)=>BOSS[k]?Math.round(BOSS[k].val*mktF(k)):Math.round((PRICE[k]||100)*.6*geneMul(g)*mktF(k));
+let fishVal=(k,g)=>BOSS[k]?Math.round(BOSS[k].val*mktF(k)):Math.round((PRICE[k]||100)*.6*geneMul(g)*mktF(k));
 
 /* ---------- 釣具、介面 ---------- */
 const rodM=new THREE.MeshStandardMaterial({color:C(0x2a2a2a),roughness:.4,metalness:.3}),rod=new THREE.Group();rod.visible=false;scene.add(rod);const RSEG=[];{let par=rod;const SL2=.32;for(let i=0;i<6;i++){const g=new THREE.Group();g.position.y=i?SL2:0;par.add(g);add(new THREE.CylinderGeometry(.014-(i+1)*.0015,.014-i*.0015,SL2,6).translate(0,SL2/2,0),rodM,0,0,0,g);if(i)add(new THREE.TorusGeometry(.012,.002,4,10),new THREE.MeshStandardMaterial({color:0xcccccc,metalness:.8}),.012,0,0,g);RSEG.push(g);par=g;}

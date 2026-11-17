@@ -16,7 +16,7 @@ function trSheet(){const T=S.trophy||[];const L=trSort(T);sheet('🏆 標本陳�
  (L.length?L.map(({t,i},n)=>`<div class="row2"><span>${n<12?'🔆':'📦'} <b>${trName(t)}</b> <span class="mut sm">${t.cm} cm・${new Date(t.t).toLocaleDateString()}</span></span><span><button class="btn sm" data-p="${i}">${t.pin?'📌 取消':'📌 釘選'}</button><button class="btn sm" data-s="${i}">賣 ${fmt$(trVal(t))}</button></span></div>`).join(''):'<div class="mut">還沒有標本。去釣魚，釣到大魚後按「🏆 標本」。</div>'),
  c=>{c.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{const t=T[+b.dataset.p];t.pin=!t.pin;markDirty();trVis();trSheet();});
   c.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{const t=T[+b.dataset.s];if(!confirm(`把「${trName(t)}」標本賣給收藏家，拿到 ${fmt$(trVal(t))}？`))return;T.splice(+b.dataset.s,1);earn(trVal(t));markDirty();trVis();trSheet();});});}
-const trVal=t=>BOSS[t.k]?Math.round(BOSS[t.k].val*.8):Math.round((PRICE[t.k]||150)*1.2+t.cm*4);
+const trVal=t=>BOSS[t.k]?Math.round(BOSS[t.k].val*.5):Math.round((PRICE[t.k]||150)*1.2+t.cm*4);
 /* ---- 3D：新翼主廳東半邊兩排展示櫃 ---- */
 wingLvl(function(){const g=WV.g,X=WG.x,Z=WG.z;const ped=new THREE.MeshStandardMaterial({color:C(0x2b3440),roughness:.5,metalness:.3}),gl=new THREE.MeshStandardMaterial({color:C(0xd8f0ff),transparent:true,opacity:.18,roughness:.05,depthWrite:false}),wd=new THREE.MeshStandardMaterial({color:C(0x6a4a2e),roughness:.6});
  const sg=add(new THREE.PlaneGeometry(3,.66),new THREE.MeshBasicMaterial({map:vText([['🏆 釣魚標本陳列室',56,.42],['FISHING TROPHIES',28,.8,'#ffd27a']],720,160,'#16222e','#ffffff')}),6,3.4,-9.85,g);

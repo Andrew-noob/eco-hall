@@ -1,7 +1,8 @@
 /* =================================================================
    二樓新翼：繁殖場（真實繁殖流程、孵蛋室、水母生活史）
    ================================================================= */
-const WG=V(1400,0,-1400);
+const WG=V(28.2,5,2),WY=5;
+function wingLvl(fn){const s0=STATIONS.length,o0=OBST.length,a0=AREAS.length;fn();for(let i=s0;i<STATIONS.length;i++)STATIONS[i].p.y+=WY;OBST2.push(...OBST.splice(o0));AREAS2.push(...AREAS.splice(a0));}
 /* ---- 物種繁殖資料（遊戲時間：分鐘） ----
  g: egg 下蛋 / live 胎生 / spawn 產卵 / frog 蛙類
  cool: 需要降溫期幾分鐘、coolT 降溫溫度；T 繁殖溫度；H 濕度（陸棲）
@@ -164,11 +165,11 @@ const _cb2=checkBreed;checkBreed=function(tk){const st=tk.st,now=Date.now();st.b
  _cb2(tk);};
 /* ---- 3D：二樓新翼 ---- */
 let WRET=null;const WV={};
-(function(){const X=WG.x,Z=WG.z;const g=new THREE.Group();g.position.copy(WG);scene.add(g);WV.g=g;
+wingLvl(function(){const X=WG.x,Z=WG.z;const g=new THREE.Group();g.position.copy(WG);scene.add(g);WV.g=g;
  const fl=new THREE.MeshStandardMaterial({color:C(0xcfd6dc),roughness:.6}),wl=new THREE.MeshStandardMaterial({color:C(0xe9edf0),roughness:.9}),dk=new THREE.MeshStandardMaterial({color:C(0x2b3440),roughness:.6,metalness:.3}),
   gl=new THREE.MeshStandardMaterial({color:C(0xbfe6ff),transparent:true,opacity:.22,roughness:.05,metalness:.1,depthWrite:false}),em=c=>new THREE.MeshBasicMaterial({color:C(c)});
  box(24,.1,20,fl,0,-.05,0,g);box(24,.1,20,new THREE.MeshStandardMaterial({color:C(0xf4f6f8),roughness:1}),0,4.05,0,g);
- box(24,4,.2,wl,0,2,-10,g);box(24,4,.2,wl,0,2,10,g);box(.2,4,20,wl,-12,2,0,g);[[-10,-7.5],[-5.5,-1.5],[.5,4.5],[6.5,10]].forEach(([a,b])=>box(.2,4,b-a,wl,12,2,(a+b)/2,g));box(.2,1.4,20,wl,12,3.3,0,g);box(.2,4,8,wl,0,2,-6,g);box(.2,4,8,wl,0,2,6,g);
+ box(24,4,.2,wl,0,2,-10,g);box(24,4,.2,wl,0,2,10,g);box(.2,4,17.2,wl,-12,2,-1.4,g);box(.2,4,.2,wl,-12,2,9.9,g);box(.2,1,2.6,wl,-12,3.5,8.5,g);[[-10,-7.5],[-5.5,-1.5],[.5,4.5],[6.5,10]].forEach(([a,b])=>box(.2,4,b-a,wl,12,2,(a+b)/2,g));box(.2,1.4,20,wl,12,3.3,0,g);box(.2,4,8,wl,0,2,-6,g);box(.2,4,8,wl,0,2,6,g);
  for(let x=-9;x<=9;x+=6)for(let z=-6;z<=6;z+=6)box(1.6,.04,.5,em(0xffffff),x,4,z,g);
  box(23.8,.02,.4,new THREE.MeshStandardMaterial({color:C(0x3fb6a8)}),0,.01,0,g);
  const sign=(t,sub,x,y,z,ry,w=3.2)=>{const m=add(new THREE.PlaneGeometry(w,w*.22),new THREE.MeshBasicMaterial({map:vText([[t,64,.42],[sub||'',30,.8,'#9fd8ff']],720,160,'#16222e','#ffffff')}),x,y,z,g);m.rotation.y=ry;return m;};
@@ -200,15 +201,21 @@ let WRET=null;const WV={};
  WV.door={};[['lf','🦗 活餌區','LIVE FOOD',-6.5],['rs','🔬 研究區','RESEARCH',-.5],['cs','🌏 保育中心','CONSERVATION',5.5]].forEach(([id,t,s,z])=>{const sh=box(.1,2.6,2.2,new THREE.MeshStandardMaterial({color:C(0x59626c),metalness:.4,roughness:.5}),11.9,1.3,z,g);sign(t,s,11.85,3.2,z,-Math.PI/2,2.6);
   const tp=add(new THREE.PlaneGeometry(2.1,.25),new THREE.MeshBasicMaterial({map:vText([['施工中',30,.5]],512,48,'#f2c230','#111')}),11.8,1.4,z,g);tp.rotation.y=-Math.PI/2;WV.door[id]={sh,tp,z};});
  /* 出口 */
- box(1.8,2.6,.1,new THREE.MeshStandardMaterial({color:C(0x3fb6a8),emissive:C(0x0a3a34)}),6,1.3,9.9,g);sign('← 回二樓','BACK TO 2F',6,3,9.84,Math.PI,2.4);STATIONS.push({p:V(X+6,1.3,Z+9.6),fn:()=>leaveWing()});
+ sign('← 二樓展廳','',-11.85,3.5,8.5,Math.PI/2,2.2);
  AREAS.push([X-11.5,X+11.5,Z-9.5,Z+9.5]);OBST.push([X-.25,X+.25,Z-10,Z-2],[X-.25,X+.25,Z+2,Z+10]);
- /* 二樓的門 */
- const dg=new THREE.Group();dg.position.set(-6,5,.78);scene.add(dg);box(1.6,2.5,.08,new THREE.MeshStandardMaterial({color:C(0x3fb6a8),emissive:C(0x0a3a34)}),0,1.25,0,dg);box(1.8,.12,.14,dk,0,2.56,0,dg);
- const ds=add(new THREE.PlaneGeometry(1.8,.42),new THREE.MeshBasicMaterial({map:vText([['二樓新翼 →',48,.42],['繁殖場・研究・保育',26,.8,'#9fd8ff']],512,120,'#16222e','#ffffff')}),0,2.95,.05,dg);
- STATIONS.push({p:V(-6,6.3,.85),fn:()=>goWing()});})();
-function goWing(){if(typeof curW==='function'&&curW()&&typeof endFish==='function')endFish();if(!inWing())WRET={x:player.x,y:player.y,z:player.z,yaw:player.yaw};Object.assign(player,{x:WG.x-5,y:0,z:WG.z+8,yaw:0,pitch:0});bfVis();toast('🏢 二樓新翼：繁殖場',2200);}
-function leaveWing(){const r=WRET&&!(Math.abs(WRET.x-WG.x)<30)?WRET:{x:-6,y:5,z:2.2,yaw:Math.PI};Object.assign(player,{x:r.x,y:r.y,z:r.z,yaw:r.yaw,pitch:0});WRET=null;toast('🏛 回到二樓',1800);}
-const inWing=()=>Math.abs(player.x-WG.x)<14&&Math.abs(player.z-WG.z)<12;
+});
+/* 二樓東牆打通，接一條走廊到新翼 */
+(function(){const w=scene.children.find(m=>m.isMesh&&Math.abs(m.position.x-12.1)<.01&&Math.abs(m.position.y-7.3)<.01&&Math.abs(m.position.z-8)<.01&&m.geometry.parameters&&m.geometry.parameters.depth===16);const mt=w?w.material:new THREE.MeshStandardMaterial({color:C(0xe9edf0)});if(w)scene.remove(w);
+ box(.2,4.6,9.2,mt,12.1,7.3,4.6);box(.2,4.6,4.2,mt,12.1,7.3,13.9);box(.2,.6,2.6,mt,12.1,9.3,10.5);
+ const fl=new THREE.MeshStandardMaterial({color:C(0xcfd6dc),roughness:.6}),wl=new THREE.MeshStandardMaterial({color:C(0xe9edf0),roughness:.9});
+ box(4.3,.1,2.8,fl,14.15,4.95,10.5);box(4.3,.1,2.8,new THREE.MeshStandardMaterial({color:C(0xf4f6f8)}),14.15,9.05,10.5);box(4.3,4,.15,wl,14.15,7,9.12);box(4.3,4,.15,wl,14.15,7,11.88);
+ box(4.1,.02,.3,new THREE.MeshStandardMaterial({color:C(0x3fb6a8)}),14.15,5.01,10.5);box(1.4,.04,.4,new THREE.MeshBasicMaterial({color:C(0xffffff)}),14.15,8.98,10.5);
+ const sg=add(new THREE.PlaneGeometry(2.4,.56),new THREE.MeshBasicMaterial({map:vText([['二樓新翼 →',52,.42],['繁殖場・活餌・研究・保育',26,.8,'#9fd8ff']],600,140,'#16222e','#ffffff')}),11.98,8.6,10.5);sg.rotation.y=-Math.PI/2;
+ AREAS2.push([11.4,16.8,9.4,11.6]);})();
+
+function goWing(){if(typeof curW==='function'&&curW()&&typeof endFish==='function')endFish();if(!inWing())WRET={x:player.x,y:player.y,z:player.z,yaw:player.yaw};Object.assign(player,{x:WG.x-9,y:5,z:WG.z+8.5,yaw:0,pitch:0});bfVis();toast('🏢 二樓新翼：繁殖場',2200);}
+function leaveWing(){const r={x:9,y:5,z:10.5,yaw:Math.PI/2};Object.assign(player,{x:r.x,y:r.y,z:r.z,yaw:r.yaw,pitch:0});WRET=null;toast('🏛 回到二樓',1800);}
+const inWing=()=>player.y>2.5&&player.x>13.9&&player.x<WG.x+29&&Math.abs(player.z-WG.z)<11;
 function bfVis(){if(!WV.boxes)return;const b=ensureBF();
  WV.boxes.forEach((o,i)=>{const x=b.box[i],lock=i>=boxN();const c=o.cv.getContext('2d');c.fillStyle=lock?'#111820':STC[x.st]||'#3a4654';c.fillRect(0,0,256,96);c.fillStyle=lock||x.st==='idle'?'#cfe':'#04131c';c.textAlign='center';c.font='700 30px "PingFang TC",sans-serif';
   c.fillText(lock?'🔒 未開放':x.st==='idle'?`繁殖箱 ${i+1}`:SP[x.sp].n,128,38);c.font='600 24px "PingFang TC",sans-serif';c.fillText(lock?'升級繁殖場':x.st==='idle'?'空的・點我放入':`${STN[x.st]} ${Math.round(x.p*100)}%`,128,76);o.tx.needsUpdate=true;

@@ -2,12 +2,12 @@
    二樓新翼東側：活餌區（每種活餌有自己的養法，產出高品質活餌）
    ================================================================= */
 /* ---- 東側三間房的外殼 ---- */
-(function(){const g=WV.g,X=WG.x,Z=WG.z;const wl=new THREE.MeshStandardMaterial({color:C(0xe9edf0),roughness:.9}),fl=new THREE.MeshStandardMaterial({color:C(0xc8d0d6),roughness:.6});
+wingLvl(function(){const g=WV.g,X=WG.x,Z=WG.z;const wl=new THREE.MeshStandardMaterial({color:C(0xe9edf0),roughness:.9}),fl=new THREE.MeshStandardMaterial({color:C(0xc8d0d6),roughness:.6});
  box(16,.1,20,fl,20,-.05,0,g);box(16,.1,20,new THREE.MeshStandardMaterial({color:C(0xf4f6f8),roughness:1}),20,4.05,0,g);
  box(.2,4,20,wl,28,2,0,g);box(16,4,.2,wl,20,2,-10,g);box(16,4,.2,wl,20,2,10,g);box(16,4,.2,wl,20,2,-3.2,g);box(16,4,.2,wl,20,2,2.8,g);
  for(const z of[-6.6,-.2,6.4])for(const x of[16,24])box(1.6,.04,.5,new THREE.MeshBasicMaterial({color:C(0xffffff)}),x,4,z,g);
- AREAS.push([X+12.2,X+27.6,Z-9.6,Z-3.6]);})();
-function openDoor(id){const d=WV.door&&WV.door[id];if(!d||d.open)return;d.open=1;d.sh.visible=false;d.tp.visible=false;AREAS.push([WG.x+11.2,WG.x+12.8,WG.z+d.z-.95,WG.z+d.z+.95]);}
+ AREAS.push([X+12.2,X+27.6,Z-9.6,Z-3.6]);});
+function openDoor(id){const d=WV.door&&WV.door[id];if(!d||d.open)return;d.open=1;d.sh.visible=false;d.tp.visible=false;AREAS2.push([WG.x+11.2,WG.x+12.8,WG.z+d.z-.95,WG.z+d.z+.95]);}
 openDoor('lf');
 /* ---- 資料 ---- */
 const LFN={nau:['🦐','新鮮無節幼體'],roti:['🦠','輪蟲'],cope:['🦐','橈足類'],gut:['🦗','腸道負載蟋蟀'],worm:['🐛','大麥蟲'],ff:['🪰','果蠅'],pinky:['🐁','乳鼠']};
@@ -123,7 +123,7 @@ const _bb=bfBirth;bfBirth=function(i){const b=ensureBF(),x=b.box[i],r=BRE[x.sp],
 const _jf=bfTick;bfTick=function(){const L=S.lf;if(L&&S.bf&&L.st.nau>0){for(const k in S.bf.jel){const j=S.bf.jel[k];if(j.eph.length&&j.eph.some(e=>Date.now()-e.f>3*60e3)&&L.st.nau>=1){L.st.nau--;j.fedT=Date.now();for(const e of j.eph)e.f=Date.now();}}}_jf();};
 /* ---- 3D：活餌區 ---- */
 const LV={};
-(function(){const g=WV.g,X=WG.x,Z=WG.z;const dk=new THREE.MeshStandardMaterial({color:C(0x2b3440),roughness:.6,metalness:.3});
+wingLvl(function(){const g=WV.g,X=WG.x,Z=WG.z;const dk=new THREE.MeshStandardMaterial({color:C(0x2b3440),roughness:.6,metalness:.3});
  const sign=(t,sub,x,y,z,ry,w=3)=>{const m=add(new THREE.PlaneGeometry(w,w*.22),new THREE.MeshBasicMaterial({map:vText([[t,64,.42],[sub||'',30,.8,'#9fd8ff']],720,160,'#16222e','#ffffff')}),x,y,z,g);m.rotation.y=ry;return m;};
  sign('🦗 活餌區','LIVE FOOD CULTURE',20,3.3,-9.85,0,3.4);
  const st=(p,fn,ox=0,oz=0)=>STATIONS.push({p:V(X+p[0]+ox,p[1],Z+p[2]+oz),fn});
@@ -146,7 +146,7 @@ const LV={};
  sign('🪰 果蠅培養','',14.4,2.1,-3.45,Math.PI,1.8);st([14.4,1,-4.2],()=>lfSheet('ff'));OBST.push([X+13.4,X+15.4,Z-4.6,Z-3.4]);
  /* 鼠架 */
  const rk=new THREE.Group();rk.position.set(18.8,0,-4);g.add(rk);for(let j=0;j<3;j++){box(2.2,.04,.6,dk,0,.3+j*.6,0,rk);box(.6,.35,.5,new THREE.MeshStandardMaterial({color:C(0xd8e4ea),transparent:true,opacity:.7}),-.6,.5+j*.6,0,rk);box(.6,.35,.5,new THREE.MeshStandardMaterial({color:C(0xd8e4ea),transparent:true,opacity:.7}),.6,.5+j*.6,0,rk);}
- sign('🐁 冷凍鼠繁殖架','',18.8,2.3,-3.45,Math.PI,2);st([18.8,1,-4],()=>lfSheet('ms'));OBST.push([X+17.6,X+20,Z-4.4,Z-3.4]);})();
+ sign('🐁 冷凍鼠繁殖架','',18.8,2.3,-3.45,Math.PI,2);st([18.8,1,-4],()=>lfSheet('ms'));OBST.push([X+17.6,X+20,Z-4.4,Z-3.4]);});
 function lfVis(){if(!LV.br)return;const L=ensureLF();L.br.forEach((c,i)=>{LV.br[i].lq.visible=c.st!=='idle';LV.br[i].lq.material.color.set(c.st==='ready'?0xff8a3a:0xd27a3a);});
  const a=L.pl.crash>0?.05:L.pl.alg;LV.alg.forEach((m,i)=>{if(i<4){m.material.color.setRGB(.25+.1*(1-a),.4+.4*Math.min(1,a),.2);m.material.opacity=.35+.5*Math.min(1,a);}});
  LV.cups.forEach((m,i)=>m.visible=i<L.sw.cups.length);LV.ff.forEach((m,i)=>m.visible=i<L.ff.v.length);}

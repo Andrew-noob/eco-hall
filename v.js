@@ -80,10 +80,13 @@ MAKE.giso=seaBug('giso',.35,.04);MAKE.hcrab=seaBug('hcrab',.5,.05);
 (function(){const wall=scene.children.find(m=>m.isMesh&&Math.abs(m.position.x+36.15)<.01&&Math.abs(m.position.z-28)<.01&&m.geometry.parameters&&m.geometry.parameters.depth===16);
  const sand=wall?wall.material:new THREE.MeshStandardMaterial({color:C(0x7a6248),roughness:.9});if(wall)scene.remove(wall);
  box(.3,5,1.4,sand,-36.15,2.5,20.7);box(.3,5,12.6,sand,-36.15,2.5,29.7);box(.3,2,2,sand,-36.15,4,22.4);
- const fl=add(new THREE.PlaneGeometry(16,16),new THREE.MeshStandardMaterial({color:C(0x2a2622),roughness:.85,normalMap:rep(scaleN,8,8),normalScale:new THREE.Vector2(.2,.2)}),-44.2,0,28);fl.rotation.x=-Math.PI/2;
- const dark=new THREE.MeshStandardMaterial({color:C(0x1c1a20),roughness:.9});box(.3,5,16.6,dark,-52.3,2.5,28);box(16.3,5,.3,dark,-44.2,2.5,36.15);box(16.3,5,.3,dark,-44.2,2.5,19.85);
- const cl=add(new THREE.PlaneGeometry(16,16),new THREE.MeshStandardMaterial({color:C(0x121116),roughness:1}),-44.2,5,28);cl.rotation.x=Math.PI/2;
- for(const [x,z] of[[-48,24],[-48,32],[-41,24],[-41,32]])glow(x,4.3,z,1.6,0xb8e0ff,.55);
+ for(const [w,h,y,x0] of[[.08,1.2,.6,-35.96],[.1,.08,1.22,-35.94]]){const m=scene.children.find(o=>o.isMesh&&Math.abs(o.position.x-x0)<.005&&Math.abs(o.position.y-y)<.005&&Math.abs(o.position.z-28)<.01&&o.geometry.parameters&&o.geometry.parameters.depth===16);if(m){const mt=m.material;scene.remove(m);box(w,h,1.4,mt,x0,y,20.7);box(w,h,12.6,mt,x0,y,29.7);}}
+ const jamb=new THREE.MeshStandardMaterial({color:C(0x2a2a30),roughness:.6});box(.5,3,.12,jamb,-36.15,1.5,21.36);box(.5,3,.12,jamb,-36.15,1.5,23.44);box(.5,.12,2.2,jamb,-36.15,3,22.4);
+ const fl=add(new THREE.PlaneGeometry(16,16),new THREE.MeshStandardMaterial({color:C(0x6a625a),roughness:.85,normalMap:rep(scaleN,8,8),normalScale:new THREE.Vector2(.2,.2)}),-44.2,0,28);fl.rotation.x=-Math.PI/2;
+ const dark=new THREE.MeshStandardMaterial({color:C(0x4a4652),roughness:.9});box(.3,5,16.6,dark,-52.3,2.5,28);box(16.3,5,.3,dark,-44.2,2.5,36.15);box(16.3,5,.3,dark,-44.2,2.5,19.85);
+ const cl=add(new THREE.PlaneGeometry(16,16),new THREE.MeshStandardMaterial({color:C(0x2a2830),roughness:1}),-44.2,5,28);cl.rotation.x=Math.PI/2;
+ for(const [x,z] of[[-48,24],[-48,32],[-41,24],[-41,32],[-44.5,28]]){glow(x,4.3,z,1.8,0xe8f4ff,.7);box(1.2,.05,.4,new THREE.MeshBasicMaterial({color:C(0xffffff)}),x,4.95,z);}
+ const al=new THREE.PointLight(C(0xfff4e8),1.1,18,1.6);al.position.set(-44,4.2,28);scene.add(al);
  const sg=add(new THREE.PlaneGeometry(4,.9),new THREE.MeshBasicMaterial({map:vText([['🕷 節肢動物館',64,.42],['ARTHROPODS・地球上 80% 的動物都是節肢動物',26,.8,'#9fffd8']],720,160,'#101418','#ffffff')}),-36.35,3.9,28,scene);sg.rotation.y=-Math.PI/2;
  const sg2=add(new THREE.PlaneGeometry(1.8,.4),new THREE.MeshBasicMaterial({map:vText([['🕷 節肢動物館 →',44,.5]],512,110,'#101418','#9fffd8')}),-35.98,3.3,22.4,scene);sg2.rotation.y=Math.PI/2;
  /* 中央：紫外線展示台 */

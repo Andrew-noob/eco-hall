@@ -1,7 +1,7 @@
 /* =================================================================
    二樓新翼東側：🔬 研究區、🌏 保育中心
    ================================================================= */
-openDoor('rs');openDoor('cs');AREAS.push([WG.x+12.2,WG.x+27.6,WG.z-3.0,WG.z+2.4],[WG.x+12.2,WG.x+27.6,WG.z+3.2,WG.z+9.6]);
+openDoor('rs');openDoor('cs');AREAS2.push([WG.x+12.2,WG.x+27.6,WG.z-3.0,WG.z+2.4],[WG.x+12.2,WG.x+27.6,WG.z+3.2,WG.z+9.6]);
 /* ---- 研究 ---- */
 const RS={
  inc:{n:'🌡 孵化生理學',d:'孵蛋室會顯示每個溫度的公母比例；蛋可以多忍受 1°C 的溫差',rp:6,min:2},
@@ -116,7 +116,7 @@ function csBind(c){const Cn=S.cons;c.querySelectorAll('[data-t]').forEach(x=>x.o
   if(repT(Cn.rep)!==old)setTimeout(()=>toast(`🎉 生態館升格為「${repT(Cn.rep)}」！`,4600),4300);csVis();csSheet('proj');});}
 /* ---- 3D：研究區、保育中心 ---- */
 const UV={};
-(function(){const g=WV.g,X=WG.x,Z=WG.z;const dk=new THREE.MeshStandardMaterial({color:C(0x2b3440),roughness:.6,metalness:.3}),wt=new THREE.MeshStandardMaterial({color:C(0xf2f4f6),roughness:.5});
+wingLvl(function(){const g=WV.g,X=WG.x,Z=WG.z;const dk=new THREE.MeshStandardMaterial({color:C(0x2b3440),roughness:.6,metalness:.3}),wt=new THREE.MeshStandardMaterial({color:C(0xf2f4f6),roughness:.5});
  const sign=(t,sub,x,y,z,ry,w=3)=>{const m=add(new THREE.PlaneGeometry(w,w*.22),new THREE.MeshBasicMaterial({map:vText([[t,64,.42],[sub||'',30,.8,'#9fd8ff']],720,160,'#16222e','#ffffff')}),x,y,z,g);m.rotation.y=ry;return m;};
  const st=(p,fn)=>STATIONS.push({p:V(X+p[0],p[1],Z+p[2]),fn});
  /* 研究區 z -3..2.6 */
@@ -137,7 +137,7 @@ const UV={};
  const gt=new THREE.Group();gt.position.set(21.5,0,9.85);g.add(gt);box(2.4,2.8,.1,new THREE.MeshStandardMaterial({color:C(0x2f6b3f),emissive:C(0x0a2a12)}),0,1.4,0,gt);add(new THREE.PlaneGeometry(2.1,1.6),new THREE.MeshBasicMaterial({map:vText([['🌲',120,.42],['野放閘門',40,.85]],300,240,'#1e4a2a','#ffffff')}),0,1.5,-.06,gt).rotation.y=Math.PI;
  st([21.5,1.4,9.4],()=>csSheet('rel'));
  UV.tro=[];const sh=new THREE.Group();sh.position.set(25.5,0,9.5);g.add(sh);box(2.6,.06,.5,dk,0,1.2,0,sh);box(2.6,.06,.5,dk,0,1.8,0,sh);for(let i=0;i<15;i++){const m=add(new THREE.CylinderGeometry(.08,.11,.28,10),new THREE.MeshStandardMaterial({color:C(0xd8a830),metalness:.8,roughness:.25}),-1.1+(i%8)*.31,1.37+Math.floor(i/8)*.6,0,sh);m.visible=false;UV.tro.push(m);}
- sign('🏅 保育成就','',25.5,2.6,9.8,Math.PI,1.8);st([25.5,1.5,9.2],()=>csSheet('bad'));OBST.push([X+24.1,X+26.9,Z+9.1,Z+9.9]);})();
+ sign('🏅 保育成就','',25.5,2.6,9.8,Math.PI,1.8);st([25.5,1.5,9.2],()=>csSheet('bad'));OBST.push([X+24.1,X+26.9,Z+9.1,Z+9.9]);});
 function csVis(){if(!UV.map)return;ensureRS();const Cn=S.cons,x=UV.map.getContext('2d');x.fillStyle='#0e3a5a';x.fillRect(0,0,900,420);x.fillStyle='#2e6a4a';
  [[120,120,90,70],[200,270,45,90],[430,110,60,50],[470,250,60,85],[640,140,140,80],[760,300,60,40],[340,60,35,25]].forEach(([a,b,w,h])=>{x.beginPath();x.ellipse(a,b,w,h,0,0,Math.PI*2);x.fill();});
  const pins={pturtle:[720,175],sakura:[722,170],hemi:[725,180],crested:[815,300],clown:[790,265],seahorse:[700,220],moon:[710,160],dart:[205,240],tortoise:[470,215],gecko:[600,150],turtle:[740,230],shark:[780,250],ytang:[60,180],arapaima:[220,265],manta:[300,240]};

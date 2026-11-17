@@ -406,6 +406,7 @@ async function load(){let got=null;const done=()=>{loaded=true;for(const s of SL
    docRef=db.doc('data/users/'+id+'/museum');const sn=await docRef.get();return sn.exists?sn.data():{};})(),timer]);
    if(res&&res!=='timeout'&&res.tanks)got=JSON.parse(JSON.stringify(res));if(res==='timeout')docRef=null;}}catch(e){docRef=null;}
  if(!got){try{const l=JSON.parse(localStorage.getItem('museum-v2'));if(l&&l.tanks)got=l;}catch(e){}}
+ if(!window.claude&&typeof cloudLoad==='function'){const c=await cloudLoad();if(c&&(!got||(c.t||0)>(got.t||0)))got=c;}
  if(got)S=Object.assign(S,got);done();}
 
 /* =================================================================

@@ -144,6 +144,6 @@ function importSave(){const i=document.createElement('input');i.type='file';i.st
   d.t=Date.now();if(S.nick&&!d.nick)d.nick=S.nick;try{localStorage.setItem('museum-v2',JSON.stringify(d));}catch(e){}
   if(cloudRef){try{await cloudRef.set({j:JSON.stringify(d),t:d.t,nick:d.nick||''});}catch(e){}}else if(docRef){try{await docRef.set(d);}catch(e){}}
   toast('📥 匯入完成，重新載入中…',3000);setTimeout(()=>location.reload(),900);};r.readAsText(f);};i.click();}
-const _ms4=moreSheet;moreSheet=function(){_ms4();const c=$('#shC');for(const [h,s,f] of [['💾 匯出存檔','下載成檔案，備份或搬到別的地方',exportSave],['📥 匯入存檔','選一個存檔檔案，取代目前的進度',importSave]]){const b=document.createElement('button');b.className='opt';b.innerHTML=`<b>${h}</b><span class="mut">${s}</span>`;b.onclick=f;c.appendChild(b);}};
+const _ms4=mapSheet;mapSheet=function(){_ms4();const c=$('#shC'),d=document.createElement('div');d.style.cssText='display:flex;gap:6px;margin-top:6px';d.innerHTML='<button class="btn" style="flex:1" id="oEx">💾 匯出存檔</button><button class="btn" style="flex:1" id="oIm">📥 匯入存檔</button>';c.insertBefore(d,c.children[3]||null);d.querySelector('#oEx').onclick=exportSave;d.querySelector('#oIm').onclick=importSave;};
 
 boot();

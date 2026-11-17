@@ -391,7 +391,7 @@ const used=tk=>tk.st.animals.reduce((a,e)=>a+SP[e.sp].cost,0);
    ================================================================= */
 let S={v:2,t:Date.now(),nid:1,tanks:{}},docRef=null,saving=false,dirty=false,loaded=false;
 function markDirty(){dirty=true;}
-async function save(){if(!loaded||saving||!dirty)return;dirty=false;saving=true;S.t=Date.now();const data=JSON.parse(JSON.stringify(S));
+async function save(){if((typeof VISIT!=='undefined'&&VISIT)||!loaded||saving||!dirty)return;dirty=false;saving=true;S.t=Date.now();const data=JSON.parse(JSON.stringify(S));
  try{if(docRef)await docRef.set(data);else localStorage.setItem('museum-v2',JSON.stringify(data));}catch(e){try{localStorage.setItem('museum-v2',JSON.stringify(data));}catch(_){}}saving=false;}
 setInterval(save,5000);setInterval(()=>{if(loaded&&Object.keys(S.tanks).length)dirty=true;},90000);
 function applyOffline(){const el=clamp((Date.now()-(S.t||Date.now()))/1000,0,7*86400);if(el<60)return;
@@ -401,6 +401,7 @@ function applyOffline(){const el=clamp((Date.now()-(S.t||Date.now()))/1000,0,7*8
 async function load(){let got=null;const done=()=>{loaded=true;for(const s of SLOTS)placeholder(s);for(const id in S.tanks){const s=SLOTS.find(x=>x.id===id);if(s)buildTank(s,S.tanks[id]);}
   if((S.v||2)<3){for(const id in S.tanks)for(const e of S.tanks[id].animals)if(e.size!=null&&e.size<.85&&!/寶寶/.test(e.name))e.size=.85;S.v=3;markDirty();}
   applyOffline();refreshChips();if(!Object.keys(S.tanks).length)toast('走到發光的虛線空展位，設置你的第一個展缸',5000);};
+ if(typeof VISIT!=='undefined'&&VISIT){const v=await visitLoad();if(v){S=Object.assign(S,v);done();visitUI();return;}toast('找不到這個人的館，回到你的館');setTimeout(()=>{location.href=location.pathname;},1500);}
  const timer=new Promise(r=>setTimeout(()=>r('timeout'),10000));
  try{if(window.claude&&claude.use){const res=await Promise.race([(async()=>{const db=await claude.use('db'),us=await claude.use('user');if(!db||!us)return null;const id=await us.id();if(!id)return null;
    docRef=db.doc('data/users/'+id+'/museum');const sn=await docRef.get();return sn.exists?sn.data():{};})(),timer]);

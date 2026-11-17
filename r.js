@@ -57,11 +57,12 @@ globalAnims.push((t,dt)=>{const k=curW();
 setTimeout(()=>{try{wellSync();}catch(e){}},1500);
 
 /* ---------- 線上：全服排行榜、玩家市集 ---------- */
+const VISIT=(()=>{try{return new URLSearchParams(location.search).get('visit')||'';}catch(e){return '';}})();
 const ON={ready:false,db:null,uid:null,canW:false};
 const FBC={apiKey:"AIzaSyCjBkO264RwY2U_RHEPw3UadvmGIA8fGJo",authDomain:"eco-hall.firebaseapp.com",projectId:"eco-hall",storageBucket:"eco-hall.firebasestorage.app",messagingSenderId:"793329877041",appId:"1:793329877041:web:3e73f31949ffe16b0d1510"};
 const ldJs=u=>new Promise((ok,no)=>{const s=document.createElement('script');s.src=u;s.onload=ok;s.onerror=no;document.head.appendChild(s);});
 let fbP=null;function fbInit(){if(fbP)return fbP;fbP=(async()=>{const V='https://www.gstatic.com/firebasejs/10.12.2/';await ldJs(V+'firebase-app-compat.js');await ldJs(V+'firebase-auth-compat.js');await ldJs(V+'firebase-firestore-compat.js');
- const fb=window.firebase;if(!fb.apps.length)fb.initializeApp(FBC);const au=fb.auth();let u=await new Promise(r=>{const un=au.onAuthStateChanged(x=>{un();r(x);});});if(!u){const cr=await au.signInAnonymously();u=cr&&cr.user;}if(!u)return ON;Object.assign(ON,{ready:true,db:fb.firestore(),uid:u.uid,canW:true,g:!u.isAnonymous,gName:u.displayName||((u.providerData||[])[0]||{}).displayName||''});return ON;})().catch(e=>{fbP=null;return ON;});return fbP;}
+ const fb=window.firebase;if(!fb.apps.length)fb.initializeApp(FBC);const au=fb.auth();let u=await new Promise(r=>{const un=au.onAuthStateChanged(x=>{un();r(x);});});if(!u){const cr=await au.signInAnonymously();u=cr&&cr.user;}if(!u)return ON;Object.assign(ON,{ready:true,db:fb.firestore(),uid:u.uid,canW:true,g:!u.isAnonymous,gName:u.displayName||((u.providerData||[])[0]||{}).displayName||''});if(VISIT)ON.canW=false;return ON;})().catch(e=>{fbP=null;return ON;});return fbP;}
 async function onInit(){if(ON.ready)return ON;try{if(!(window.claude&&claude.use))return await fbInit();const db=await claude.use('db'),us=await claude.use('user');if(!db||!us)return ON;const id=await us.id();if(!id)return ON;
  let cw=null;try{cw=await us.can('data.write');}catch(e){}Object.assign(ON,{ready:true,db,uid:id,canW:cw!==false});}catch(e){}return ON;}
 const wait10=p=>Promise.race([p,new Promise((_,r)=>setTimeout(()=>r({code:'timeout'}),10000))]);
@@ -103,12 +104,12 @@ function listSheet(){const L=[];for(const id in TANKS){const tk=TANKS[id];for(co
    const it={iid:o.uid.slice(-6)+'-'+Date.now().toString(36),sp,g:{...x.e.g},sex:x.e.sex||'',name:x.e.name||SP[sp].n,price,t:Date.now()};items.push(it);await ref.set({nick:S.nick,items,t:Date.now()});
    if(x.tk)sellAnimalSilent(x.tk,x.e);else S.wh.splice(x.wh,1);markDirty();toast(`🏪 ${it.name} 上架了（${fmt$(price)}）`,2600);mktSheet();}catch(e){toast('上架失敗，等一下再試');}}));}
 function sellAnimalSilent(tk,e){const cr=tk.creatures.find(k=>k.entry===e);if(cr){if(typeof GLO!=='undefined')GLO.delete(cr);cr.dispose();tk.creatures.splice(tk.creatures.indexOf(cr),1);}tk.st.animals.splice(tk.st.animals.indexOf(e),1);logEv(tk.st,`${e.name} 上架到玩家市集`);refreshChips();if(sel&&sel.entry===e){$('#pick').style.display='none';sel=null;}}
-const _ms1=mapSheet;mapSheet=function(){_ms1();const c=$('#shC'),d=document.createElement('div');d.style.cssText='display:flex;gap:6px;margin-top:10px';d.innerHTML='<button class="btn" style="flex:1" id="oLb">🏆 全服排行榜</button><button class="btn" style="flex:1" id="oMk">🏪 玩家市集</button>';c.insertBefore(d,c.children[1]||null);d.querySelector('#oLb').onclick=()=>lbSheet();d.querySelector('#oMk').onclick=()=>mktSheet();};
+const _ms1=mapSheet;mapSheet=function(){_ms1();if(VISIT)return;const c=$('#shC'),d=document.createElement('div');d.style.cssText='display:flex;gap:6px;margin-top:10px';d.innerHTML='<button class="btn" style="flex:1" id="oLb">🏆 全服排行榜</button><button class="btn" style="flex:1" id="oMk">🏪 玩家市集</button>';c.insertBefore(d,c.children[1]||null);d.querySelector('#oLb').onclick=()=>lbSheet();d.querySelector('#oMk').onclick=()=>mktSheet();};
 const _ms2=moreSheet;moreSheet=function(){_ms2();const c=$('#shC'),b=document.createElement('button');b.className='opt';b.innerHTML='<b>🏆 全服排行榜</b><span class="mut">和其他玩家比最大的魚、Boss 數</span>';b.onclick=()=>lbSheet();c.appendChild(b);};
 setTimeout(()=>{settleMarket();},8000);
 /* ---------- Firebase：雲端存檔、Google 登入、誰在玩 ---------- */
 let cloudRef=null,cloudT=0;
-let cloudLT=0;function cloudPush(force){if(!cloudRef||!loaded)return;if(!force&&Date.now()-cloudT<60000)return;if(S.t&&S.t===cloudLT&&!force)return;cloudT=Date.now();cloudLT=S.t;S.t=S.t||Date.now();cloudRef.set({j:JSON.stringify(S),t:S.t,nick:S.nick||''}).catch(()=>{});}
+let cloudLT=0;function cloudPush(force){if(VISIT||!cloudRef||!loaded)return;if(!force&&Date.now()-cloudT<60000)return;if(S.t&&S.t===cloudLT&&!force)return;cloudT=Date.now();cloudLT=S.t;S.t=S.t||Date.now();cloudRef.set({j:JSON.stringify(S),t:S.t,nick:S.nick||''}).catch(()=>{});pubPush();}
 async function cloudLoad(){if(window.claude)return null;try{const o=await Promise.race([fbInit(),new Promise(r=>setTimeout(()=>r(null),6000))]);if(!o||!o.ready)return null;cloudRef=o.db.doc('saves/'+o.uid);const sn=await wait10(cloudRef.get());if(sn.exists){const d=sn.data();const c=JSON.parse(d.j||'null');if(c&&c.tanks)return c;}}catch(e){}return null;}
 async function gLogin(){const o=await fbInit();if(!o.ready){toast('連不上，確認有網路後再試');return;}const fb=window.firebase,au=fb.auth(),pv=new fb.auth.GoogleAuthProvider();
  try{const r=await au.currentUser.linkWithPopup(pv);ON.g=true;ON.gName=r.user.displayName||((r.user.providerData||[])[0]||{}).displayName||'';if(!S.nick&&ON.gName)S.nick=ON.gName.slice(0,12);markDirty();cloudPush(true);presence();toast('✅ 已綁定 Google，換手機登入同一個帳號就能接著玩',4200);mapSheet();}
@@ -118,18 +119,18 @@ async function gLogin(){const o=await fbInit();if(!o.ready){toast('連不上，�
   else if(c==='auth/popup-closed-by-user'||c==='auth/cancelled-popup-request')return;
   else if(c==='auth/popup-blocked'||c==='auth/operation-not-supported-in-this-environment'||c==='auth/web-storage-unsupported'||c==='auth/internal-error')toast('請用 Safari 或 Chrome 打開遊戲再登入（LINE 裡的瀏覽器不能用 Google 登入）',5200);
   else toast('登入失敗：'+c,4000);}}
-async function presence(){if(window.claude||document.hidden||!loaded)return;const o=await fbInit();if(!o.ready)return;let n=0;for(const id in S.tanks)n+=(S.tanks[id].animals||[]).length;
+async function presence(){if(VISIT||window.claude||document.hidden||!loaded)return;const o=await fbInit();if(!o.ready)return;let n=0;for(const id in S.tanks)n+=(S.tanks[id].animals||[]).length;
  try{await o.db.doc('on/'+o.uid).set({nick:S.nick||'',t:Date.now(),g:!!ON.g,n});}catch(e){}}
 function rename(){const v=(prompt('新的暱稱（最多 12 字）',S.nick||'')||'').trim().slice(0,12);if(!v)return;S.nick=v;markDirty();cloudPush(true);presence();lbPushSoon();toast('✏️ 暱稱改成「'+v+'」');}
 const agoT=ms=>ms<60000?'剛剛':ms<3600000?Math.floor(ms/60000)+' 分鐘前':ms<86400000?Math.floor(ms/3600000)+' 小時前':Math.floor(ms/86400000)+' 天前';
 async function whoSheet(){const T='👥 誰在玩';sheet(T,'<div class="mut">讀取中…</div>');const o=await fbInit();if(!o.ready){sheet(T,'<div class="mut sm">目前連不上線上資料，確認有網路後再試一次。</div>');return;}
  await presence();let ds=[];try{const sn=await wait10(o.db.collection('on').orderBy('t','desc').limit(100).get());ds=sn.docs.map(d=>({id:d.id,...d.data()}));}catch(e){sheet(T,'<div class="mut sm">暫時讀不到，等一下再試。</div>');return;}
  const now=Date.now(),on=ds.filter(d=>now-d.t<180000),rec=ds.filter(d=>now-d.t>=180000&&now-d.t<7*86400000);
- const row=(d,live)=>`<div class="row2" style="${d.id===o.uid?'background:rgba(111,211,255,.12);border-radius:6px':''}"><span>${live?'🟢':'⚪'} <b>${esc(String(d.nick||'無名玩家'))}</b>${d.id===o.uid?' <span class="mut sm">（你）</span>':''}</span><span class="mut sm">${d.n||0} 隻動物・${live?'在線':agoT(now-d.t)}</span></div>`;
+ const row=(d,live)=>`<div class="row2" style="${d.id===o.uid?'background:rgba(111,211,255,.12);border-radius:6px':''}"><span>${live?'🟢':'⚪'} <b>${esc(String(d.nick||'無名玩家'))}</b>${d.id===o.uid?' <span class="mut sm">（你）</span>':''}</span><span class="mut sm">${d.n||0} 隻・${live?'在線':agoT(now-d.t)} ${d.id!==o.uid?`<button class="btn sm" data-v="${esc(d.id)}">🏛 參觀</button>`:''}</span></div>`;
  sheet(T,`<div style="margin-bottom:6px"><b>現在在線 ${on.length} 人</b></div>${on.map(d=>row(d,true)).join('')||'<div class="mut sm">目前只有你</div>'}
   <div style="margin:12px 0 6px"><b>這週來過</b></div>${rec.map(d=>row(d,false)).join('')||'<div class="mut sm">還沒有</div>'}
-  <div style="display:flex;gap:6px;margin-top:12px"><button class="btn" style="flex:1" id="wRn">✏️ 改暱稱</button><button class="btn" style="flex:1" id="wRf">🔄 重新整理</button></div>`,c=>{c.querySelector('#wRn').onclick=()=>{rename();whoSheet();};c.querySelector('#wRf').onclick=()=>whoSheet();});}
-const _ms3=mapSheet;mapSheet=function(){_ms3();if(window.claude)return;const c=$('#shC'),d=document.createElement('div');d.style.cssText='display:flex;gap:6px;margin-top:6px';
+  <div style="display:flex;gap:6px;margin-top:12px"><button class="btn" style="flex:1" id="wRn">✏️ 改暱稱</button><button class="btn" style="flex:1" id="wRf">🔄 重新整理</button></div>`,c=>{c.querySelector('#wRn').onclick=()=>{rename();whoSheet();};c.querySelector('#wRf').onclick=()=>whoSheet();c.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>goVisit(b.dataset.v));gbBox(c);});}
+const _ms3=mapSheet;mapSheet=function(){_ms3();if(window.claude||VISIT)return;const c=$('#shC'),d=document.createElement('div');d.style.cssText='display:flex;gap:6px;margin-top:6px';
  d.innerHTML=`<button class="btn" style="flex:1" id="oWho">👥 誰在玩</button><button class="btn" style="flex:1" id="oG">${ON.g?'✅ '+esc((ON.gName||'Google').slice(0,8)):'🔑 Google 登入'}</button>`;c.insertBefore(d,c.children[2]||null);
  d.querySelector('#oWho').onclick=()=>whoSheet();d.querySelector('#oG').onclick=()=>{if(ON.g)toast('已用 Google 登入，進度會存到雲端，換手機登入同一個帳號就能接著玩',4200);else gLogin();};};
 if(!window.claude){setInterval(()=>cloudPush(false),15000);setInterval(presence,60000);setTimeout(presence,9000);
@@ -144,7 +145,41 @@ function importSave(){const i=document.createElement('input');i.type='file';i.st
   d.t=Date.now();if(S.nick&&!d.nick)d.nick=S.nick;try{localStorage.setItem('museum-v2',JSON.stringify(d));}catch(e){}
   if(cloudRef){try{await cloudRef.set({j:JSON.stringify(d),t:d.t,nick:d.nick||''});}catch(e){}}else if(docRef){try{await docRef.set(d);}catch(e){}}
   toast('📥 匯入完成，重新載入中…',3000);setTimeout(()=>location.reload(),900);};r.readAsText(f);};i.click();}
-const _ms4=mapSheet;mapSheet=function(){_ms4();const c=$('#shC'),d=document.createElement('div');d.style.cssText='display:flex;gap:6px;margin-top:6px';d.innerHTML='<button class="btn" style="flex:1" id="oEx">💾 匯出存檔</button><button class="btn" style="flex:1" id="oIm">📥 匯入存檔</button>';c.insertBefore(d,c.children[3]||null);d.querySelector('#oEx').onclick=exportSave;d.querySelector('#oIm').onclick=importSave;};
+const _ms4=mapSheet;mapSheet=function(){_ms4();if(VISIT)return;const c=$('#shC'),d=document.createElement('div');d.style.cssText='display:flex;gap:6px;margin-top:6px';d.innerHTML='<button class="btn" style="flex:1" id="oEx">💾 匯出存檔</button><button class="btn" style="flex:1" id="oIm">📥 匯入存檔</button>';c.insertBefore(d,c.children[3]||null);d.querySelector('#oEx').onclick=exportSave;d.querySelector('#oIm').onclick=importSave;};
+
+
+/* ---------- 參觀別人的館、按讚、留言、送禮 ---------- */
+let VNAME='';const homeURL=()=>location.pathname;
+function pubPush(){if(VISIT||window.claude)return;fbInit().then(o=>{if(!o.ready)return;const t={};for(const k in S.tanks)t[k]=Object.assign({},S.tanks[k],{log:[]});
+ o.db.doc('pub/'+o.uid).set({j:JSON.stringify({tanks:t,gd:S.gd||null,up:S.up||null}),nick:S.nick||'',t:Date.now()}).catch(()=>{});});}
+async function goVisit(id){toast('🏛 出發參觀…');try{dirty=true;await save();}catch(e){}cloudPush(true);setTimeout(()=>{location.href=homeURL()+'?visit='+encodeURIComponent(id);},600);}
+async function visitLoad(){const o=await Promise.race([fbInit(),new Promise(r=>setTimeout(()=>r(null),8000))]);if(!o||!o.ready)return null;
+ try{const sn=await wait10(o.db.doc('pub/'+VISIT).get());if(!sn.exists)return null;const d=sn.data(),v=JSON.parse(d.j||'null');if(!v||!v.tanks)return null;VNAME=d.nick||'玩家';
+  return Object.assign({money:0,wh:[],fishLog:{},well:[]},v,{nick:VNAME});}catch(e){return null;}}
+const ownSave=()=>{try{return JSON.parse(localStorage.getItem('museum-v2'))||null;}catch(e){return null;}};
+const myNick=()=>{const l=ownSave();return (l&&l.nick)||'玩家';};
+async function gbSend(it){const o=await fbInit();if(!o.ready)return false;const ref=o.db.doc('gb/'+o.uid);
+ try{const cur=await ref.get();const items=(cur.exists?(cur.data().items||[]):[]).slice(-60);items.push(Object.assign({to:VISIT,from:o.uid,nick:myNick(),t:Date.now(),id:o.uid.slice(0,6)+Date.now().toString(36)},it));
+  await ref.set({items,to:[...new Set(items.map(x=>x.to))]});return true;}catch(e){return false;}}
+function visitUI(){const d=document.createElement('div');d.id='visitBar';d.style.cssText='position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top) + 64px);z-index:60;display:flex;gap:6px;background:rgba(8,18,28,.9);padding:8px 10px;border-radius:14px;align-items:center;max-width:94vw;flex-wrap:wrap;justify-content:center;border:1px solid rgba(111,211,255,.35)';
+ d.innerHTML=`<span style="color:#d8f0ff;font-size:14px;width:100%;text-align:center">🏛 正在參觀 <b>${esc(VNAME)}</b> 的館</span><button class="btn sm" id="vL">❤️ 讚</button><button class="btn sm" id="vG">🎁 送禮</button><button class="btn sm" id="vM">✍️ 留言</button><button class="btn sm feed" id="vH">🏠 回家</button>`;document.body.appendChild(d);
+ let liked=false;d.querySelector('#vH').onclick=()=>{location.href=homeURL();};
+ d.querySelector('#vL').onclick=async()=>{if(liked){toast('已經按過讚了');return;}liked=true;toast(await gbSend({k:'like'})?'❤️ 按讚了':'按讚失敗，等一下再試');};
+ d.querySelector('#vM').onclick=async()=>{const m=(prompt(`留言給 ${VNAME}（最多 60 字）`,'')||'').trim().slice(0,60);if(!m)return;toast(await gbSend({k:'msg',m})?'✍️ 留言送出':'留言失敗，等一下再試');};
+ d.querySelector('#vG').onclick=async()=>{const l=ownSave();const have=(l&&l.money)||0;const v=Math.floor(+prompt(`送金幣給 ${VNAME}（50～5000，你有 ${fmt$(have)}）`,'500')||0);if(!v)return;
+  if(v<50||v>5000){toast('金額要在 50～5000 之間');return;}if(have<v){toast('你的金幣不夠');return;}
+  l.money-=v;l.t=Date.now();try{localStorage.setItem('museum-v2',JSON.stringify(l));}catch(e){}if(cloudRef){try{await cloudRef.set({j:JSON.stringify(l),t:l.t,nick:l.nick||''});}catch(e){}}
+  toast(await gbSend({k:'gift',v})?`🎁 送出 ${fmt$(v)}`:'送禮失敗，等一下再試',3000);};
+ setTimeout(()=>toast(`歡迎參觀 ${VNAME} 的館！這裡的東西動了也不會影響他`,4200),600);}
+async function gbFetch(){const o=await fbInit();if(!o.ready)return [];const got=[];try{const sn=await wait10(o.db.collection('gb').where('to','array-contains',o.uid).limit(100).get());
+ for(const d of sn.docs)for(const it of(d.data().items||[]))if(it.to===o.uid)got.push(it);}catch(e){}got.sort((a,b)=>b.t-a.t);return got;}
+async function gbCheck(){if(VISIT||window.claude||!loaded)return;const got=await gbFetch();S.gbSeen=S.gbSeen||{};let money=0,n=0,likes=0;
+ for(const it of got){if(S.gbSeen[it.id])continue;S.gbSeen[it.id]=1;n++;if(it.k==='gift')money+=Math.min(5000,Math.max(0,it.v||0));if(it.k==='like')likes++;}
+ if(n){if(money)earn(money);markDirty();toast(`📬 有 ${n} 則新訪客動態${likes?`・❤️ ${likes}`:''}${money?`・🎁 收到 ${fmt$(money)}`:''}（地圖 → 誰在玩）`,5000);}}
+async function gbBox(c){const box=document.createElement('div');box.innerHTML='<div style="margin:14px 0 6px"><b>📬 訪客留言板</b></div><div class="mut sm">讀取中…</div>';c.appendChild(box);
+ const got=(await gbFetch()).slice(0,30),now=Date.now();const ic={like:'❤️',msg:'✍️',gift:'🎁'};
+ box.innerHTML='<div style="margin:14px 0 6px"><b>📬 訪客留言板</b></div>'+(got.map(it=>`<div class="row2"><span>${ic[it.k]||'•'} <b>${esc(String(it.nick||'玩家'))}</b> <span class="mut sm">${it.k==='like'?'按了讚':it.k==='gift'?'送了 '+fmt$(it.v||0):esc(String(it.m||''))}</span></span><span class="mut sm">${agoT(now-it.t)}</span></div>`).join('')||'<div class="mut sm">還沒有人來過，請朋友來參觀吧！</div>');}
+if(!window.claude&&!VISIT){setTimeout(gbCheck,12000);setInterval(gbCheck,180000);}
 
 if(typeof S!=='undefined')setInterval(()=>{if(S.inf){S.inf=false;markDirty();updMoney();}},3000);
 boot();

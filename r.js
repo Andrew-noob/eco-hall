@@ -60,7 +60,7 @@ setTimeout(()=>{try{wellSync();}catch(e){}},1500);
 /* ---------- 線上：全服排行榜、玩家市集 ---------- */
 const VISIT=(()=>{try{return new URLSearchParams(location.search).get('visit')||'';}catch(e){return '';}})();
 const ON={ready:false,db:null,uid:null,canW:false};
-const FBC={apiKey:"AIzaSyCjBkO264RwY2U_RHEPw3UadvmGIA8fGJo",authDomain:"eco-hall.firebaseapp.com",projectId:"eco-hall",storageBucket:"eco-hall.firebasestorage.app",messagingSenderId:"793329877041",appId:"1:793329877041:web:3e73f31949ffe16b0d1510"};
+const FBC={apiKey:"AIzaSyCjBkO264RwY2U_RHEPw3UadvmGIA8fGJo",authDomain:"eco-hall.firebaseapp.com",projectId:"eco-hall",storageBucket:"eco-hall.firebasestorage.app",messagingSenderId:"793329877041",appId:"1:793329877041:web:3e73f31949ffe16b0d1510",databaseURL:"https://eco-hall-default-rtdb.asia-southeast1.firebasedatabase.app"};
 const ldJs=u=>new Promise((ok,no)=>{const s=document.createElement('script');s.src=u;s.onload=ok;s.onerror=no;document.head.appendChild(s);});
 let fbP=null;function fbInit(){if(fbP)return fbP;fbP=(async()=>{const V='https://www.gstatic.com/firebasejs/10.12.2/';await ldJs(V+'firebase-app-compat.js');await ldJs(V+'firebase-auth-compat.js');await ldJs(V+'firebase-firestore-compat.js');
  const fb=window.firebase;if(!fb.apps.length)fb.initializeApp(FBC);const au=fb.auth();let u=await new Promise(r=>{const un=au.onAuthStateChanged(x=>{un();r(x);});});if(!u){const cr=await au.signInAnonymously();u=cr&&cr.user;}if(!u)return ON;Object.assign(ON,{ready:true,db:fb.firestore(),uid:u.uid,canW:true,g:!u.isAnonymous,gName:u.displayName||((u.providerData||[])[0]||{}).displayName||''});if(VISIT)ON.canW=false;return ON;})().catch(e=>{fbP=null;return ON;});return fbP;}

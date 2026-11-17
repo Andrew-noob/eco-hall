@@ -101,4 +101,4 @@ MAKE.giso=seaBug('giso',.35,.04);MAKE.hcrab=seaBug('hcrab',.5,.05);
  MAPX[0]=-54;DEST.push({n:'節肢動物館',r:[-52,-36,20,36],to:[-38,0,28,Math.PI/2]});})();
 /* 館藏提示 */
 setTimeout(()=>{if(loaded&&!(S.flags&&S.flags.arth)){S.flags=S.flags||{};S.flags.arth=1;markDirty();toast('🕷 新展館開放：從爬蟲館西邊的門走進「節肢動物館」，有蠍子、狼蛛、獨角仙、鱟…',6000);}},6000);
-boot();
+

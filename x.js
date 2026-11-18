@@ -21,10 +21,11 @@ function livePush(force){if(!LIVE.on||!LIVE.me||document.hidden)return;const L=L
  if(LIVE.emo&&now-LIVE.emo.t<4000)d.e=LIVE.emo;if(LIVE.cat&&now-LIVE.cat.t<6000)d.c=LIVE.cat;if(LIVE.sw&&now-LIVE.sw<600)d.s=LIVE.sw;LIVE.me.set(d).catch(()=>{});}
 setInterval(()=>livePush(false),250);document.addEventListener('visibilitychange',()=>{if(!LIVE.on||!LIVE.me)return;if(document.hidden)LIVE.me.remove().catch(()=>{});else livePush(true);});
 /* ---- 小人 ---- */
+{const st=document.createElement('style');st.textContent='#sheet{z-index:90!important}.toast{z-index:95!important}';document.head.appendChild(st);}
 const hueOf=s=>{let h=0;for(const c of s)h=(h*31+c.charCodeAt(0))%360;return h;};
 function nameTex(n,host){const cv=document.createElement('canvas');cv.width=320;cv.height=80;const x=cv.getContext('2d');x.fillStyle='rgba(8,18,28,.75)';x.beginPath();x.roundRect?x.roundRect(4,8,312,64,30):x.rect(4,8,312,64);x.fill();x.fillStyle='#fff';x.textAlign='center';x.textBaseline='middle';x.font='700 34px "PingFang TC",sans-serif';x.fillText((host?(LIVE.room&&LIVE.room.startsWith('sea_')?'⚓ ':'🏠 '):'')+n,160,42);return new THREE.CanvasTexture(cv);}
 function emoTex(e){const cv=document.createElement('canvas');cv.width=160;cv.height=160;const x=cv.getContext('2d');x.font='110px sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillText(e,80,88);return new THREE.CanvasTexture(cv);}
-function heldFish(k){const d=dispGeo(k);const m=new THREE.Mesh(d.g,new THREE.MeshStandardMaterial({vertexColors:true,roughness:.4,side:THREE.DoubleSide}));const L=SLAP[k]?SLAP[k].vis:.4;m.scale.setScalar(L/d.len);return m;}
+function heldFish(k,fp){const d=dispGeo(k);const m=new THREE.Mesh(d.g,new THREE.MeshStandardMaterial({vertexColors:true,roughness:.4,side:THREE.DoubleSide}));const L=Math.min(SLAP[k]?SLAP[k].vis:.4,fp?.42:.9);m.scale.setScalar(L/d.len);return m;}
 function mkAvatar(id,v){const g=new THREE.Group();const col=new THREE.Color().setHSL(hueOf(id)/360,.55,.55);const m=new THREE.MeshStandardMaterial({color:col,roughness:.6});
  add(new THREE.CylinderGeometry(.2,.25,.95,14),m,0,.72,0,g);add(new THREE.SphereGeometry(.2,14,10),m,0,.2,0,g).scale.set(1.25,.5,1.25);add(new THREE.SphereGeometry(.17,16,12),new THREE.MeshStandardMaterial({color:C(0xf2d2b6),roughness:.7}),0,1.37,0,g);
  const eye=new THREE.MeshBasicMaterial({color:C(0x111111)});add(new THREE.SphereGeometry(.025,6,4),eye,-.06,1.4,-.15,g);add(new THREE.SphereGeometry(.025,6,4),eye,.06,1.4,-.15,g);
@@ -50,7 +51,7 @@ const SLAP={sardine:{n:'沙丁魚',p:3,cd:.6,vis:.3},mullet:{n:'烏魚',p:5,cd:.
  grouper:{n:'龍膽石斑',p:9,cd:1.4,vis:.7},shark:{n:'黑鰭礁鯊',p:12,cd:2,vis:1},marlin:{n:'旗魚',p:16,cd:3,vis:1.3},whale:{n:'鯨鯊',p:22,cd:8,vis:1.6,aoe:4}};
 function slapOwned(){const L=S.fishLog||{};const own=Object.keys(SLAP).filter(k=>k==='sardine'||L[k]||L['boss:'+k]);let hasW=false;for(const id in TANKS)if(TANKS[id].st&&TANKS[id].st.animals.some(e=>e.sp==='whale'))hasW=true;if(hasW&&!own.includes('whale'))own.push('whale');return own;}
 let HF=null,swingT=0,slapCD=0;const KB={vx:0,vz:0,sh:0};
-function setWeapon(k){LIVE.wpn=k;if(HF){camera.remove(HF);HF=null;}if(!k)return;if(!camera.parent)scene.add(camera);HF=heldFish(k);HF.position.set(.32,-.32,-.75);HF.rotation.set(0,Math.PI/2+.3,-.6);camera.add(HF);HF.userData.base=HF.rotation.clone();livePush(true);}
+function setWeapon(k){LIVE.wpn=k;if(HF){camera.remove(HF);HF=null;}if(!k)return;if(!camera.parent)scene.add(camera);HF=heldFish(k,true);HF.position.set(.34,-.36,-.8);HF.rotation.set(0,Math.PI/2+.3,-.6);camera.add(HF);HF.userData.base=HF.rotation.clone();livePush(true);}
 function swing(){if(slapCD>0)return;const k=LIVE.wpn||'sardine',w=SLAP[k];slapCD=w.cd;swingT=.35;LIVE.sw=Date.now();livePush(true);
  const fx=-Math.sin(player.yaw),fz=-Math.cos(player.yaw);let hit=0;
  for(const id in LIVE.av){const a=LIVE.av[id],p=a.g.position;const dx=p.x-player.x,dz=p.z-player.z,d=Math.hypot(dx,dz);if(Math.abs(p.y-(player.y||0))>1.5)continue;
@@ -69,7 +70,10 @@ function liveHud(){let h=document.getElementById('liveHud');const n=Object.keys(
  h.innerHTML=`<span style="color:#d8f0ff;font-size:13px;width:100%;text-align:right">👥 ${n+1} 人在${LIVE.room&&LIVE.room.startsWith('sea_')?'船上':'館裡'}</span>${['👋','❤️','😂','👍'].map(e=>`<button class="btn sm" data-e="${e}" style="padding:4px 7px">${e}</button>`).join('')}
   <button class="btn sm" id="wpn" style="padding:4px 7px">🐟 ${SLAP[LIVE.wpn||'sardine'].n} ▾</button><button class="btn sm feed" id="swg" style="padding:4px 10px">揮！</button>`;
  h.querySelectorAll('[data-e]').forEach(b=>b.onclick=()=>{LIVE.emo={k:b.dataset.e,t:Date.now()};livePush(true);toast(`你比了 ${b.dataset.e}`,1200);});
- h.querySelector('#swg').onclick=swing;h.querySelector('#wpn').onclick=()=>{const i=own.indexOf(LIVE.wpn||'sardine');setWeapon(own[(i+1)%own.length]);toast(`🐟 換成 ${SLAP[LIVE.wpn].n}（擊飛力 ${SLAP[LIVE.wpn].p}）${own.length<2?'・釣到更大的魚可以解鎖新武器':''}`,2200);liveHud();};}
+ h.querySelector('#swg').onclick=swing;h.querySelector('#wpn').onclick=wpnSheet;}
+const HOW={sardine:'一開始就有',mullet:'釣到烏魚',hairtail:'釣到白帶魚',kuhua:'釣到苦花',grouper:'釣到龍膽石斑',shark:'釣到黑鰭礁鯊',marlin:'釣到 Boss 旗魚',whale:'館裡養一隻鯨鯊'};
+function wpnSheet(){const own=slapOwned(),cur=LIVE.wpn||'sardine';sheet('🐟 選一條魚當武器',`<div class="mut sm" style="margin-bottom:6px">擊飛力越大，對方飛越遠；越大的魚冷卻越久。</div>`+Object.entries(SLAP).map(([k,w])=>{const ok=own.includes(k);return`<button class="opt" data-w="${k}" ${ok?'':'disabled style="opacity:.45"'}><b>${k===cur?'✅ ':''}${w.n}</b><span class="mut">擊飛力 ${w.p}・冷卻 ${w.cd} 秒${w.aoe?'・💥 範圍攻擊':''}${ok?'':'・🔒 '+HOW[k]}</span></button>`;}).join(''),
+ c=>c.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>{if(!own.includes(b.dataset.w))return;setWeapon(b.dataset.w);$('#sheet').classList.remove('open');liveHud();toast(`🐟 拿起${SLAP[b.dataset.w].n}`,1500);}));}
 /* ---- 釣到魚時通知同一間的人 ---- */
 const _lfL=landFish;landFish=function(){_lfL();const c=FS&&FS.catch;if(c&&LIVE.on){LIVE.cat={nm:c.nm,cm:c.cm,t:Date.now()};livePush(true);}};
 /* ---- ⛵ 一起出海：邀請、接受 ---- */

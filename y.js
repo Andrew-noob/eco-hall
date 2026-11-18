@@ -87,4 +87,4 @@ function qSheet(){ensureQ();const m=mScore(),st=starOf(m.score),nx=STARS[st]||nu
   QS.map((c,ci)=>`<h4 style="margin:12px 0 4px">${c.ch}</h4>`+c.q.map(q=>{const p=qProg(q),done=S.qs.done[q.id];return`<div class="res" style="${done?'opacity:.55':''}"><div><b>${done?'✅':p>=q.need?'🎁':'▫️'} ${q.n}</b></div><div class="mut sm">${q.d?q.d+'・':''}${done?'已完成':`${p}/${q.need}`}・${fmt$(q.$)}</div>${!done&&p>=q.need?`<button class="btn sm feed" data-q="${q.id}">領獎</button>`:'<span></span>'}</div>`;}).join('')).join(''),
   c=>c.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{qClaim(QALL.find(q=>q.id===b.dataset.q));qSheet();}));}
 setInterval(()=>{if(loaded)qTrk();},4000);setInterval(tkTick,60000);setTimeout(()=>{if(loaded){S.tk=S.tk||{t:Date.now(),tot:0};tkTick();applyBoat();qTrk();}},4000);
-boot();
+

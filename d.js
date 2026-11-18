@@ -191,7 +191,7 @@ DECO.yard=function(tk){const W=tk.W,D=tk.D,mx=W*.25,mz=D*.2;
  const fac=add(new THREE.PlaneGeometry(9,1.6),new THREE.MeshBasicMaterial({map:vText([['生 態 館',110,.42],['ECOLOGY HALL',40,.83,'#9fd8ff']],1024,192,'#0b1a24','#f4efe2')}),0,7.4,40.32);
  const stone=new THREE.MeshStandardMaterial({color:C(0xb8ae9c),roughness:.8});
  box(.3,8,16.6,stone,41.35,4,28);box(26.9,8,.3,stone,28,4,19.65);box(26.9,8,.3,stone,28,4,36.35);
- const trees=[[-30,46],[-34,58],[-26,66],[-33,76],[-28,90],[-22,95],[30,46],[34,58],[27,68],[33,80],[26,92],[21,96],[-6,96],[8,95]];
+ const trees=[[-30,46],[-34,58],[-26,66],[-33,76],[-28,90],[-22,95],[34,58],[27,68],[33,80],[26,92],[21,96],[-6,96],[8,95]];
  window.__treeObst=[];for(const [x,z] of trees){treeAt(scene,x,0,z,rnd(5,8),{r:.32,n:10});window.__treeObst.push([x-.6,x+.6,z-.6,z+.6]);}
  const lampM=new THREE.MeshStandardMaterial({color:C(0x222222),metalness:.6,roughness:.4});window.__lamps=[];
  for(const [x,z] of[[-2.6,44],[2.6,44],[-2.6,52],[2.6,52],[-2.2,60],[2.2,60]]){add(new THREE.CylinderGeometry(.05,.07,3,8),lampM,x,1.5,z);add(new THREE.SphereGeometry(.16,12,10),new THREE.MeshBasicMaterial({color:C(0xfff0d0)}),x,3.05,z);window.__lamps.push(glow(x,3.05,z,1.6,0xffe0a0,.8));}

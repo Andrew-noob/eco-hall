@@ -2,7 +2,11 @@
    🏭 飼料合成機・🛒 商店建築・📦 倉庫活魚池與船・靠近顯示管理卡・📘 新手教學・💰 收支表
    ================================================================= */
 /* ---- 拿掉舊的二樓孵化器、活餌培養室；飼料不再自動生產 ---- */
-try{incG.visible=false;cg.visible=false;}catch(e){}
+try{scene.remove(incG);scene.remove(cg);}catch(e){}
+/* 拿掉基因實驗桌旁的「繁殖區」配對台（配對繁殖改到二樓新翼的繁殖場） */
+{const bx=-6.7,bz=8;for(const o of [...scene.children]){const p=o.position;if(p&&p.x>bx-1.9&&p.x<bx+1.9&&p.z>bz-1.1&&p.z<bz+1.1&&p.y>5.2&&p.y<8.3)scene.remove(o);}for(let i=OBST2.length-1;i>=0;i--){const o=OBST2[i];if(Math.abs(o[0]-(bx-1.75))<.01&&Math.abs(o[2]-(bz-.9))<.01)OBST2.splice(i,1);}}
+for(let i=FAC.length-1;i>=0;i--)if(/繁殖區/.test(FAC[i].n))FAC.splice(i,1);
+const _gsP=geneSheet;geneSheet=function(tab){if(tab==='pair'){toast('💞 配對繁殖搬到「二樓新翼・繁殖場」了，那裡有真實的繁殖流程',3200);bfSheet('box');return;}_gsP(tab);const c=$('#shC');if(c)c.querySelectorAll('button,.chip').forEach(b=>{if(/配對|繁殖/.test(b.textContent)&&!/繁殖場/.test(b.textContent))b.remove();});};
 for(let i=STATIONS.length-1;i>=0;i--){const p=STATIONS[i].p;if((Math.abs(p.x+5.5)<.01&&Math.abs(p.z-15.3)<.01)||(Math.abs(p.x-11.2)<.01&&Math.abs(p.z-3)<.01))STATIONS.splice(i,1);}
 for(let i=FAC.length-1;i>=0;i--)if(/孵化器|活餌培養室/.test(FAC[i].n))FAC.splice(i,1);
 tickStock=function(){ensureStock();S.stockT=Date.now();};
@@ -84,10 +88,15 @@ setInterval(()=>{if(loaded)pondVis();},2000);
 function pondSheet(){const L=(S.wh||[]).map((w,i)=>({w,i})).filter(o=>isAquaSp(o.w.sp));
  sheet('🐟 倉庫活魚池',`<div class="mut sm" style="margin-bottom:6px">買來的魚、從船上帶回來的魚都會先養在這裡，看得到牠們在游。可以放進展缸、賣掉，或把小魚磨成「魚粉」拿去合成飼料。魚粉：<b>${S.fm||0}</b></div>`+
  (L.length?L.map(o=>{const v=fishVal(o.w.sp,o.w.g||{sz:1,m:'n'}),fm=Math.max(1,Math.round(((SP[o.w.sp].len||.25)*((o.w.g&&o.w.g.sz)||1))*6));return`<div class="row2"><span>🐟 ${esc(o.w.name||SP[o.w.sp].n)} <span class="mut sm">${gTag(o.w)||''}${o.w.cm?' '+o.w.cm+' cm':''}</span></span><span style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end"><button class="btn sm" data-p="${o.i}">放展缸</button><button class="btn sm" data-s="${o.i}">賣 ${fmt$(v)}</button><button class="btn sm" data-m="${o.i}">魚粉 +${fm}</button></span></div>`;}).join(''):'<div class="mut">活魚池是空的。</div>'),
- c=>{c.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>whSheet());
+ c=>{c.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>pondPlace(S.wh[+b.dataset.p]));
   c.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{const i=+b.dataset.s,w=S.wh[i];if(!w)return;const v=fishVal(w.sp,w.g||{sz:1,m:'n'});S.wh.splice(i,1);earn(v);mktHit(w.sp);markDirty();pondVis();toast(`💰 賣了 ${fmt$(v)}`,1600);pondSheet();});
   c.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{const i=+b.dataset.m,w=S.wh[i];if(!w)return;const fm=Math.max(1,Math.round(((SP[w.sp].len||.25)*((w.g&&w.g.sz)||1))*6));S.wh.splice(i,1);S.fm=(S.fm||0)+fm;markDirty();pondVis();toast(`🐟 磨成 ${fm} 份魚粉`,1600);pondSheet();});});}
-/* 舊的「帶回倉庫」：魚會進活魚池（倉庫裡的魚就在池子裡） */
+/* 活魚池放進展缸；魚的轉賣價跟活魚池一致 */
+function pondPlace(it){if(!it)return;const ds=Object.values(TANKS).filter(k=>spOK(it.sp,k)&&used(k)+SP[it.sp].cost<=SZ[k.sz].cap);
+ if(!ds.length){toast(`沒有適合的展缸，先設置一個${HT[SP[it.sp].hab].n}`,3000);return;}
+ sheet(`🐟 ${esc(it.name||SP[it.sp].n)} 要放哪一缸？`,ds.map((k,i)=>`<button class="opt" data-d="${i}"><b>${esc(k.st.name||HT[k.st.type].n)}</b><span class="mut">空間 ${used(k)}/${SZ[k.sz].cap}・${k.st.animals.length} 隻</span></button>`).join(''),
+  c=>c.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{placeIn(it,ds[+b.dataset.d]);markDirty();pondVis();toast(`🐟 放進「${ds[+b.dataset.d].st.name||HT[ds[+b.dataset.d].st.type].n}」`,2000);pondSheet();}));}
+{const _wv=whVal;whVal=it=>isAquaSp(it.sp)?fishVal(it.sp,it.g||{sz:1,m:'n'}):_wv(it);}
 /* ---- 靠近顯示管理卡：二樓新翼所有設施 ---- */
 (function(){const X=WG.x,Z=WG.z,W=(x,z)=>[X+x,Z+z];const add2=(n,d,p,fn,b)=>FAC.push({n,d,p,fn,b});
  for(let q=0;q<4;q++)add2(`🧪 繁殖箱 ${q+1}・${q+5}`,'放一對動物、調溫度濕度、看繁殖進度',W(-9.6,-5.4+q*2.6),()=>{const b=ensureBF();const i=[q,q+4].find(i=>i<boxN()&&b.box[i].st!=='idle');if(i!=null)boxSheet(i);else bfSheet('box');},'管理繁殖箱');

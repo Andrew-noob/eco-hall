@@ -49,7 +49,7 @@ globalAnims.push((dt,t)=>{for(const id in LIVE.av){const a=LIVE.av[id],T=a.tgt,g
 /* ---- 🐟 魚拍大亂鬥 ---- */
 const SLAP={sardine:{n:'沙丁魚',p:3,cd:.6,vis:.3},mullet:{n:'烏魚',p:5,cd:.8,vis:.45},hairtail:{n:'白帶魚',p:6,cd:.9,vis:.9},kuhua:{n:'苦花',p:4,cd:.7,vis:.35},
  grouper:{n:'龍膽石斑',p:9,cd:1.4,vis:.7},shark:{n:'黑鰭礁鯊',p:12,cd:2,vis:1},marlin:{n:'旗魚',p:16,cd:3,vis:1.3},whale:{n:'鯨鯊',p:22,cd:8,vis:1.6,aoe:4}};
-function slapOwned(){const L=S.fishLog||{};const own=Object.keys(SLAP).filter(k=>k==='sardine'||L[k]||L['boss:'+k]);let hasW=false;for(const id in TANKS)if(TANKS[id].st&&TANKS[id].st.animals.some(e=>e.sp==='whale'))hasW=true;if(hasW&&!own.includes('whale'))own.push('whale');return own;}
+function slapOwned(){const sv=VISIT&&typeof ownSave==='function'?ownSave():null;const L=(sv?sv.fishLog:S.fishLog)||{};const own=Object.keys(SLAP).filter(k=>k==='sardine'||L[k]||L['boss:'+k]);let hasW=false;if(sv){for(const id in (sv.tanks||{}))if((sv.tanks[id].animals||[]).some(e=>e.sp==='whale'))hasW=true;}else for(const id in TANKS)if(TANKS[id].st&&TANKS[id].st.animals.some(e=>e.sp==='whale'))hasW=true;if(hasW&&!own.includes('whale'))own.push('whale');return own;}
 let HF=null,swingT=0,slapCD=0;const KB={vx:0,vz:0,sh:0};
 function setWeapon(k){LIVE.wpn=k;if(HF){camera.remove(HF);HF=null;}if(!k)return;if(!camera.parent)scene.add(camera);HF=heldFish(k,true);HF.position.set(.34,-.36,-.8);HF.rotation.set(0,Math.PI/2+.3,-.6);camera.add(HF);HF.userData.base=HF.rotation.clone();livePush(true);}
 function swing(){if(slapCD>0)return;const k=LIVE.wpn||'sardine',w=SLAP[k];slapCD=w.cd;swingT=.35;LIVE.sw=Date.now();livePush(true);

@@ -51,7 +51,7 @@ const COLM=['alb','mel','xan','ery','cya'];
 const szCap=k=>SP[k].max?1.3:(SP[k].hab==='ocean'&&(PRICE[k]||0)>=8000)?1.5:2.0;
 const geneMul=g=>(MORPH[g.m]||MORPH.n).mul*clamp(1+(g.sz-1)*2.5,.6,2.2);
 const gTag=e=>{const g=e&&e.g;if(!g)return'';const a=[];if(g.m&&g.m!=='n')a.push(MORPH[g.m].ic+MORPH[g.m].n);if(Math.abs(g.sz-1)>.04)a.push(`${g.sz>1?'巨型':'迷你'} ${g.sz.toFixed(2)}×`);return a.join('・');};
-const whVal=it=>Math.round((PRICE[it.sp]||100)*(it.baby?.6:.8)*(it.g?geneMul(it.g):1));
+let whVal=it=>Math.round((PRICE[it.sp]||100)*(it.baby?.6:.8)*(it.g?geneMul(it.g):1));
 function ensureGenes(e){if(!e.g)e.g={sz:+rnd(.85,1.15).toFixed(3),m:'n'};return e.g;}
 function inherit(F,M,k){const a=F.g||{sz:1,m:'n'},b=M.g||{sz:1,m:'n'};let m='n',mut=false;const r=Math.random();
  if(a.m===b.m)m=a.m==='n'?'n':(r<.75?a.m:'n');else if(a.m!=='n'&&b.m!=='n')m=r<.4?a.m:r<.8?b.m:'n';else m=r<.35?(a.m!=='n'?a.m:b.m):'n';

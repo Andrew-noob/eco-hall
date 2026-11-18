@@ -34,7 +34,7 @@ const DEST=[
  {n:'新展廳',r:[41.5,53.6,19.8,36.2],to:[43,0,28,-Math.PI/2]},{n:'溪流館',r:[-38,-16,-22,0],to:[-25,0,-11,Math.PI/2],c:'#2e6a50'},
  {n:'戶外廣場',r:[-38,38,40.7,56],to:[0,0,45,Math.PI],c:'#4a6a3a'},{n:'池塘',r:[-20.5,-11.5,45,51],to:[-16,0,43.4,Math.PI],c:'#2e5a6a'},{n:'放養區',r:[12,20,45,51],to:[16,0,43.4,Math.PI],c:'#6a7a3a'},
  {n:'亞馬遜河',r:[-17.4,17.4,56.4,87.6],to:[0,0,57.2,Math.PI],c:'#2e6a5a',ride:1},{n:'鳥類館',r:[-35.8,-21,62.6,77.4],to:[-28.4,0,60.1,Math.PI],c:'#3a6a3a',round:1},
- {n:'生態農園',r:[20.5,34,62,84],to:[27,0,60.5,Math.PI],c:'#6a5a3a'},{n:'倉庫',r:[25,35,43,53],to:[23,0,48,-Math.PI/2],c:'#5a5a5a'}];
+ {n:'生態農園',r:[20.5,34,62,84],to:[27,0,60.5,Math.PI],c:'#6a5a3a'},{n:'倉庫',r:[25,35,43,63],to:[23,0,48,-Math.PI/2],c:'#5a5a5a'},{n:'商店',r:[-34,-26,45,51],to:[-23,0,48,Math.PI/2],c:'#8a5a2a'}];
 const FLOORS=[['2F 飼育後場',[-1,5,14.2,0]],['🧬 基因實驗室',[-3.3,5,11,.35]],['玻璃天橋',[-8,5,33.5,-Math.PI/2]],['🌊 大洋水槽上方',[-13,11.3,-18.3,0]]];
 function tpTo([x,y,z,yaw]){if(window.__ride&&typeof endRide==='function')endRide();if(typeof curW==='function'&&curW())endFish();Object.assign(player,{x,y,z,yaw,pitch:y>8?-.35:0});$('#sheet').classList.remove('open');}
 function mapSheet(){const W=320,H=Math.round(W*(MAPZ[1]-MAPZ[0])/(MAPX[1]-MAPX[0])),sx=x=>(x-MAPX[0])/(MAPX[1]-MAPX[0])*W,sz=z=>(z-MAPZ[0])/(MAPZ[1]-MAPZ[0])*H;

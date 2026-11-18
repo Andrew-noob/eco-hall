@@ -50,4 +50,4 @@ const _msZ=mapSheet;mapSheet=function(){_msZ();if(typeof VISIT!=='undefined'&&VI
 /* 員工也算設施分數 */
 const _mSc=mScore;mScore=function(){const r=_mSc();const n=staffN();r.score+=n*4;r.facS+=n*4;return r;};
 setInterval(staffWork,30000);setInterval(staffPay,60000);setInterval(staffIdle,20000);setTimeout(()=>{if(loaded&&!(typeof VISIT!=='undefined'&&VISIT)){ensureStaff();staffPay();staffSync();staffIdle();}},5000);
-boot();
+

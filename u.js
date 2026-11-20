@@ -43,7 +43,7 @@ function micQ(){const R=ensureRS();if(R.mic.n>=5&&Date.now()-R.mic.t<3*60e3){rsS
     c2=>{const n=c2.querySelector('#mN');if(n)n.onclick=micQ;c2.querySelector('#mB').onclick=()=>rsSheet();});}));}
 /* 行為觀察任務 */
 function newObs(){const R=ensureRS();const pool=[];for(const id in TANKS){const tk=TANKS[id];const sp=[...new Set(tk.st.animals.map(e=>e.sp))];for(const k of sp)if(SP[k]&&!SP[k].school)pool.push({id,k});}if(!pool.length){R.obs=null;return;}const p=pool[Math.random()*pool.length|0];R.obs={id:p.id,k:p.k,p:0};markDirty();}
-globalAnims.push((dt)=>{const R=S.rs;if(!R||!R.obs||!loaded)return;const tk=TANKS[R.obs.id];if(!tk){R.obs=null;return;}const w=tk.slot.wall;const d=Math.hypot(player.x-w.x,player.z-w.z);const same=Math.abs((player.y>2.5?5:0)-(w.y>2.5?5:0))<1;
+globalAnims.push((t,dt)=>{const R=S.rs;if(!R||!R.obs||!loaded)return;const tk=TANKS[R.obs.id];if(!tk){R.obs=null;return;}const w=tk.slot.wall;const d=Math.hypot(player.x-w.x,player.z-w.z);const same=Math.abs((player.y>2.5?5:0)-(w.y>2.5?5:0))<1;
  if(d<4.5&&same){R.obs.p+=dt;if(!R.obs.sh){R.obs.sh=1;toast(`👀 觀察中：${SP[R.obs.k].n}…（待在缸前 20 秒）`,2600);}if(R.obs.p>=20){const k=R.obs.k;R.obs=null;addRP(4,`完成${SP[k].n}行為觀察`);setTimeout(()=>toast(`📖 ${SP[k].f||''}`,6000),2700);}}});
 /* 研究區介面 */
 function rsSheet(tab='tree'){const R=ensureRS();rsTick();const tabs=`<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px">${chip('🧪 研究項目',tab==='tree','data-t="tree"')}${chip('🔬 顯微鏡',tab==='mic','data-t="mic"')}${chip('👀 觀察',tab==='obs','data-t="obs"')}${chip('📄 論文',tab==='pap','data-t="pap"')}${rsHas('cryo')?chip('🧊 基因庫',tab==='gb','data-t="gb"'):''}</div>
@@ -145,7 +145,7 @@ function csVis(){if(!UV.map)return;ensureRS();const Cn=S.cons,x=UV.map.getContex
  for(const k in pins){const [a,b]=pins[k];const st=Cn.done[k]?'#6fd38c':Cn.act.some(z=>z.id===k)?'#ffb347':'#557';x.fillStyle=st;x.beginPath();x.arc(a,b,9,0,Math.PI*2);x.fill();}
  x.fillStyle='#cfe';x.fillText(`🟠 進行中 ${Cn.act.length}　🟢 完成 ${Object.keys(Cn.done).length}　名聲 ${Cn.rep}・${repT(Cn.rep)}`,20,400);UV.mapT.needsUpdate=true;
  const n=Object.keys(Cn.done).length;UV.tro.forEach((m,i)=>m.visible=i<n);}
-globalAnims.push((dt,t)=>{if(!UV.fog||!inWing())return;UV.fog.forEach((m,i)=>{const y=((t*.3+i/5)%1);m.position.set(Math.sin(i*3+t)*.1,1.25+y*.7,Math.cos(i*2+t)*.1);m.material.opacity=.45*(1-y);});});
+globalAnims.push((t,dt)=>{if(!UV.fog||!inWing())return;UV.fog.forEach((m,i)=>{const y=((t*.3+i/5)%1);m.position.set(Math.sin(i*3+t)*.1,1.25+y*.7,Math.cos(i*2+t)*.1);m.material.opacity=.45*(1-y);});});
 /* 入口：地圖按鈕文字 */
 const _ms6=mapSheet;mapSheet=function(){_ms6();const c=$('#shC');if(!c)return;const b=[...c.querySelectorAll('button')].find(x=>/二樓新翼/.test(x.textContent));if(b)b.textContent='🏢 二樓新翼：繁殖場・活餌・研究・保育';};
 setInterval(()=>{rsTick();},3000);setTimeout(()=>{if(loaded){ensureRS();csVis();}},3500);setInterval(()=>{if(loaded&&inWing())csVis();},15000);

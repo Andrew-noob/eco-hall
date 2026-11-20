@@ -15,9 +15,9 @@ function liveJoin(room){if(!LIVE.db||room===LIVE.room)return;if(LIVE.ref){LIVE.r
  LIVE.ref.on('child_added',s=>liveUpd(s.key,s.val(),true));LIVE.ref.on('child_changed',s=>liveUpd(s.key,s.val(),false));LIVE.ref.on('child_removed',s=>liveDel(s.key));livePush(true);liveHud();}
 setInterval(()=>{if(LIVE.on)liveJoin(wantRoom());},1000);
 const liveNick=()=>{if(VISIT){try{const l=JSON.parse(localStorage.getItem('museum-v2'));if(l&&l.nick)return l.nick;}catch(e){}}return S.nick||'玩家';};
-function livePush(force){if(!LIVE.on||!LIVE.me||document.hidden)return;const L=LIVE.last,now=Date.now();const moved=Math.hypot(player.x-L.x,player.z-L.z)>.04||Math.abs(player.yaw-L.yaw)>.06||Math.abs((player.y||0)-(L.y||0))>.2;
+function livePush(force){if(!LIVE.on||!LIVE.me||document.hidden)return;const L=LIVE.last,now=Date.now();const moved=KB.h>0||Math.hypot(player.x-L.x,player.z-L.z)>.04||Math.abs(player.yaw-L.yaw)>.06||Math.abs((player.y||0)-(L.y||0))>.2;
  if(!force&&!moved&&now-L.t<6000)return;Object.assign(L,{x:player.x,z:player.z,y:player.y||0,yaw:player.yaw,t:now});
- const d={x:+player.x.toFixed(2),y:+(player.y||0).toFixed(2),z:+player.z.toFixed(2),r:+player.yaw.toFixed(2),n:liveNick().slice(0,12),t:now,w:LIVE.wpn||'sardine'};
+ const d={x:+player.x.toFixed(2),y:+(player.y||0).toFixed(2),z:+player.z.toFixed(2),r:+player.yaw.toFixed(2),n:liveNick().slice(0,12),t:now,w:LIVE.wpn||'sardine'};if(KB.h>0){d.h=+KB.h.toFixed(2);d.rl=+KB.roll.toFixed(2);}
  if(LIVE.emo&&now-LIVE.emo.t<4000)d.e=LIVE.emo;if(LIVE.cat&&now-LIVE.cat.t<6000)d.c=LIVE.cat;if(LIVE.sw&&now-LIVE.sw<600)d.s=LIVE.sw;LIVE.me.set(d).catch(()=>{});}
 setInterval(()=>livePush(false),250);document.addEventListener('visibilitychange',()=>{if(!LIVE.on||!LIVE.me)return;if(document.hidden)LIVE.me.remove().catch(()=>{});else livePush(true);});
 /* ---- 小人 ---- */
@@ -35,14 +35,14 @@ function mkAvatar(id,v){const g=new THREE.Group();const col=new THREE.Color().se
  g.userData.dyn=1;g.position.set(v.x,v.y||0,v.z);g.rotation.y=v.r||0;scene.add(g);return{g,nm,em,arm,n:v.n,tgt:{x:v.x,y:v.y||0,z:v.z,r:v.r||0},ph:0,et:0,ct:0,st:0,w:null,sw:0};}
 function liveUpd(id,v,added){if(!v||id===LIVE.uid)return;if(Date.now()-(v.t||0)>600e3)return;let a=LIVE.av[id];
  if(!a){a=LIVE.av[id]=mkAvatar(id,v);if(added&&Date.now()-v.t<120e3){const sea=LIVE.room.startsWith('sea_');if(sea)toast(id===LIVE.host?`⚓ 船長 ${v.n||''} 在船上`:`⛵ ${v.n||'有人'} 上船了！`,3200);else if(!VISIT)toast(`👋 ${v.n||'有人'} 來參觀你的館了！`,4200);else toast(id===LIVE.host?`🏠 館主 ${v.n||''} 在線上，就在館裡`:`👥 ${v.n||'有人'} 也在這裡參觀`,3600);}liveHud();}
- if(v.n&&v.n!==a.n){a.n=v.n;a.nm.material.map=nameTex(v.n,id===LIVE.host);}a.tgt={x:v.x,y:v.y||0,z:v.z,r:v.r||0};
+ if(v.n&&v.n!==a.n){a.n=v.n;a.nm.material.map=nameTex(v.n,id===LIVE.host);}a.tgt={x:v.x,y:v.y||0,z:v.z,r:v.r||0,h:v.h||0,rl:v.rl||0};
  if(v.w&&v.w!==a.w&&SLAP[v.w]){a.w=v.w;for(const ch of [...a.arm.children])a.arm.remove(ch);const f=heldFish(v.w);f.rotation.set(0,Math.PI/2,-1.2);f.position.set(0,0,-.1);a.arm.add(f);}
  if(v.s&&v.s!==a.st){a.st=v.s;a.sw=.35;}
  if(v.e&&v.e.t!==a.et&&Date.now()-v.e.t<5000){a.et=v.e.t;a.em.material.map=emoTex(v.e.k||'👋');a.em.material.needsUpdate=true;a.em.visible=true;a.emT=3.5;}
  if(v.c&&v.c.t!==a.ct&&Date.now()-v.c.t<8000){a.ct=v.c.t;toast(`🎣 ${v.n||'有人'} 釣到 ${v.c.cm} cm 的${v.c.nm}！`,3200);a.em.material.map=emoTex('🎣');a.em.material.needsUpdate=true;a.em.visible=true;a.emT=2.5;}}
 function liveDel(id){const a=LIVE.av[id];if(!a)return;scene.remove(a.g);delete LIVE.av[id];liveHud();}
-globalAnims.push((dt,t)=>{for(const id in LIVE.av){const a=LIVE.av[id],T=a.tgt,g=a.g;const dx=T.x-g.position.x,dz=T.z-g.position.z,d=Math.hypot(dx,dz);
- if(d>8||Math.abs(T.y-g.position.y)>2){g.position.set(T.x,T.y,T.z);}else{const k=Math.min(1,dt*8);g.position.x+=dx*k;g.position.z+=dz*k;g.position.y+=(T.y-g.position.y)*k;}
+globalAnims.push((t,dt)=>{for(const id in LIVE.av){const a=LIVE.av[id],T=a.tgt,g=a.g;const dx=T.x-g.position.x,dz=T.z-g.position.z,d=Math.hypot(dx,dz);
+ if(d>8||Math.abs(T.y-g.position.y)>2){g.position.set(T.x,T.y,T.z);}else{const k=Math.min(1,dt*8);g.position.x+=dx*k;g.position.z+=dz*k;g.position.y+=(T.y+(T.h||0)-g.position.y)*Math.min(1,dt*14);}g.rotation.z+=((T.rl||0)-g.rotation.z)*Math.min(1,dt*12);
  let dr=T.r-g.rotation.y;dr=Math.atan2(Math.sin(dr),Math.cos(dr));g.rotation.y+=dr*Math.min(1,dt*8);const mv=Math.min(1,d*6);a.ph+=dt*9*mv;g.children[0].position.y=.72+Math.abs(Math.sin(a.ph))*.05*mv;
  if(a.sw>0){a.sw-=dt;a.arm.rotation.x=-Math.sin((1-a.sw/.35)*Math.PI)*1.8;}else a.arm.rotation.x=0;
  if(a.em.visible){a.emT-=dt;a.em.position.y=2.3+Math.sin(t*4)*.05;if(a.emT<=0)a.em.visible=false;}}});
@@ -50,7 +50,7 @@ globalAnims.push((dt,t)=>{for(const id in LIVE.av){const a=LIVE.av[id],T=a.tgt,g
 const SLAP={sardine:{n:'沙丁魚',p:3,cd:.6,vis:.3},mullet:{n:'烏魚',p:5,cd:.8,vis:.45},hairtail:{n:'白帶魚',p:6,cd:.9,vis:.9},kuhua:{n:'苦花',p:4,cd:.7,vis:.35},
  grouper:{n:'龍膽石斑',p:9,cd:1.4,vis:.7},shark:{n:'黑鰭礁鯊',p:12,cd:2,vis:1},marlin:{n:'旗魚',p:16,cd:3,vis:1.3},whale:{n:'鯨鯊',p:22,cd:8,vis:1.6,aoe:4}};
 function slapOwned(){const sv=VISIT&&typeof ownSave==='function'?ownSave():null;const L=(sv?sv.fishLog:S.fishLog)||{};const own=Object.keys(SLAP).filter(k=>k==='sardine'||L[k]||L['boss:'+k]);let hasW=false;if(sv){for(const id in (sv.tanks||{}))if((sv.tanks[id].animals||[]).some(e=>e.sp==='whale'))hasW=true;}else for(const id in TANKS)if(TANKS[id].st&&TANKS[id].st.animals.some(e=>e.sp==='whale'))hasW=true;if(hasW&&!own.includes('whale'))own.push('whale');return own;}
-let HF=null,swingT=0,slapCD=0;const KB={vx:0,vz:0,sh:0};
+let HF=null,swingT=0,slapCD=0;const KB={vx:0,vz:0,vy:0,h:0,roll:0,spin:0,sh:0};
 function setWeapon(k){LIVE.wpn=k;if(HF){camera.remove(HF);HF=null;}if(!k)return;if(!camera.parent)scene.add(camera);HF=heldFish(k,true);HF.position.set(.34,-.36,-.8);HF.rotation.set(0,Math.PI/2+.3,-.6);camera.add(HF);HF.userData.base=HF.rotation.clone();livePush(true);}
 function swing(){if(slapCD>0)return;const k=LIVE.wpn||'sardine',w=SLAP[k];slapCD=w.cd;swingT=.35;LIVE.sw=Date.now();livePush(true);
  const fx=-Math.sin(player.yaw),fz=-Math.cos(player.yaw);let hit=0;
@@ -58,10 +58,11 @@ function swing(){if(slapCD>0)return;const k=LIVE.wpn||'sardine',w=SLAP[k];slapCD
   const R=w.aoe||2.3;const ang=d>0?(dx*fx+dz*fz)/d:1;if(d<R&&(w.aoe||ang>.45)){hit++;const nx=d>0?dx/d:fx,nz=d>0?dz/d:fz;LIVE.db.ref('hits/'+id).push({f:LIVE.uid,n:liveNick(),k,p:w.p,dx:+nx.toFixed(2),dz:+nz.toFixed(2),t:Date.now()}).catch(()=>{});
    a.em.material.map=emoTex('💦');a.em.material.needsUpdate=true;a.em.visible=true;a.emT=1.2;}}
  if(hit)toast(`💥 用${w.n}打中 ${hit} 個人！`,1400);}
-function gotHit(h){const w=SLAP[h.k]||SLAP.sardine;KB.vx+=h.dx*h.p;KB.vz+=h.dz*h.p;KB.sh=.5;toast(`💥 被 ${h.n||'某人'} 用${w.n}打飛了！`,2200);}
-globalAnims.push((dt,t)=>{if(slapCD>0)slapCD-=dt;if(HF){HF.visible=!(typeof curW==='function'&&curW());if(swingT>0){swingT-=dt;const s=Math.sin((1-swingT/.35)*Math.PI);HF.rotation.z=HF.userData.base.z+s*1.6;HF.position.x=.32-s*.35;}else{HF.rotation.z=HF.userData.base.z+Math.sin(t*2)*.05;HF.position.x=.32;}}
- const sp=Math.hypot(KB.vx,KB.vz);if(sp>.05){for(const [ax,v] of[['x','vx'],['z','vz']]){const nx=player.x+(ax==='x'?KB.vx*dt:0),nz=player.z+(ax==='z'?KB.vz*dt:0);if(okPos(nx,nz)){player.x=nx;player.z=nz;}else KB[v]*=-.35;}const f=Math.exp(-3.2*dt);KB.vx*=f;KB.vz*=f;}else{KB.vx=KB.vz=0;}
- if(KB.sh>0){KB.sh-=dt;player.pitch=(player.pitch||0)+Math.sin(t*60)*.01*KB.sh;}});
+function gotHit(h){const w=SLAP[h.k]||SLAP.sardine;KB.vx+=h.dx*h.p*1.15;KB.vz+=h.dz*h.p*1.15;KB.vy=Math.max(KB.vy,2.6+h.p*.42);if(KB.h<=0)KB.h=.001;KB.spin=(Math.random()<.5?-1:1)*(1.5+h.p*.35);toast(`💥 被 ${h.n||'某人'} 用${w.n}打飛了！`,2200);livePush(true);}
+globalAnims.push((t,dt)=>{if(slapCD>0)slapCD-=dt;if(HF){HF.visible=!(typeof curW==='function'&&curW());if(swingT>0){swingT-=dt;const s=Math.sin((1-swingT/.35)*Math.PI);HF.rotation.z=HF.userData.base.z+s*1.6;HF.position.x=.32-s*.35;}else{HF.rotation.z=HF.userData.base.z+Math.sin(t*2)*.05;HF.position.x=.32;}}
+ const air=KB.h>0;const sp=Math.hypot(KB.vx,KB.vz);if(sp>.05){for(const [ax,v] of[['x','vx'],['z','vz']]){const nx=player.x+(ax==='x'?KB.vx*dt:0),nz=player.z+(ax==='z'?KB.vz*dt:0);if(okPos(nx,nz)){player.x=nx;player.z=nz;}else KB[v]*=-.35;}const f=Math.exp((air?-.6:-6)*dt);KB.vx*=f;KB.vz*=f;}else{KB.vx=KB.vz=0;}
+ if(air){KB.vy-=18*dt;KB.h=Math.max(0,KB.h+KB.vy*dt);KB.roll+=KB.spin*dt;if(KB.h===0){KB.vy=0;KB.sh=.35;KB.spin=0;}}else if(Math.abs(KB.roll)>.001){KB.roll*=Math.exp(-10*dt);}
+ camera.position.y+=KB.h;if(KB.sh>0){KB.sh-=dt;camera.position.y-=Math.sin((.35-KB.sh)/.35*Math.PI)*.12;}camera.rotation.z=KB.roll;});
 /* ---- 右上角：人數、表情、揮魚 ---- */
 function liveHud(){let h=document.getElementById('liveHud');const n=Object.keys(LIVE.av).length;if(!n){if(h)h.remove();setWeapon(null);return;}
  if(!h){h=document.createElement('div');h.id='liveHud';h.style.cssText='position:fixed;right:10px;z-index:55;display:flex;flex-wrap:wrap;justify-content:flex-end;gap:5px;align-items:center;max-width:62vw;background:rgba(8,18,28,.85);padding:6px 8px;border-radius:12px;border:1px solid rgba(111,211,255,.3)';document.body.appendChild(h);}

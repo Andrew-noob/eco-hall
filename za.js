@@ -6,7 +6,7 @@ try{scene.remove(incG);scene.remove(cg);}catch(e){}
 /* 拿掉基因實驗桌旁的「繁殖區」配對台（配對繁殖改到二樓新翼的繁殖場） */
 {const bx=-6.7,bz=8;for(const o of [...scene.children]){const p=o.position;if(p&&p.x>bx-1.9&&p.x<bx+1.9&&p.z>bz-1.1&&p.z<bz+1.1&&p.y>5.2&&p.y<8.3)scene.remove(o);}for(let i=OBST2.length-1;i>=0;i--){const o=OBST2[i];if(Math.abs(o[0]-(bx-1.75))<.01&&Math.abs(o[2]-(bz-.9))<.01)OBST2.splice(i,1);}}
 for(let i=FAC.length-1;i>=0;i--)if(/繁殖區/.test(FAC[i].n))FAC.splice(i,1);
-const _gsP=geneSheet;geneSheet=function(tab){if(tab==='pair'){toast('💞 配對繁殖搬到「二樓新翼・繁殖場」了，那裡有真實的繁殖流程',3200);bfSheet('box');return;}_gsP(tab);const c=$('#shC');if(c)c.querySelectorAll('button,.chip').forEach(b=>{if(/配對|繁殖/.test(b.textContent)&&!/繁殖場/.test(b.textContent))b.remove();});};
+const _gsP=geneSheet;geneSheet=function(tab){if(typeof TUT!=='undefined')TUT.f.gene=1;if(tab==='pair'){toast('💞 配對繁殖搬到「二樓新翼・繁殖場」了，那裡有真實的繁殖流程',3200);bfSheet('box');return;}_gsP(tab);const c=$('#shC');if(c)c.querySelectorAll('button,.chip').forEach(b=>{if(/配對|繁殖/.test(b.textContent)&&!/繁殖場/.test(b.textContent))b.remove();});};
 for(let i=STATIONS.length-1;i>=0;i--){const p=STATIONS[i].p;if((Math.abs(p.x+5.5)<.01&&Math.abs(p.z-15.3)<.01)||(Math.abs(p.x-11.2)<.01&&Math.abs(p.z-3)<.01))STATIONS.splice(i,1);}
 for(let i=FAC.length-1;i>=0;i--)if(/孵化器|活餌培養室/.test(FAC[i].n))FAC.splice(i,1);
 tickStock=function(){ensureStock();S.stockT=Date.now();};
@@ -32,7 +32,7 @@ function synSheet(){ensureStock();ensureLF();S.syn=S.syn||{q:[]};S.qs&&(S.qs.f.s
  for(let i=0;i<5;i++)add(new THREE.CylinderGeometry(.08,.08,.1,10),new THREE.MeshStandardMaterial({color:C(0x8a5a2a)}),-.4,1.26,-1.1+i*.12,g);
  const sg=add(new THREE.PlaneGeometry(1.9,.45),new THREE.MeshBasicMaterial({map:vText([['🏭 飼料合成機',44,.5]],480,120,'#0b1a24','#f4efe2')}),-.58,2.5,0,g);sg.rotation.y=-Math.PI/2;
  STATIONS.push({p:V(10.8,6.2,3),fn:synSheet});FAC.push({n:'🏭 飼料合成機',d:'用魚粉、蔬菜、活餌合成飼料，比買的便宜',p:[10.2,3],fn:synSheet,b:'合成飼料'});})();
-globalAnims.push((dt,t)=>{if(WV.synL)WV.synL.material.color.set(S.syn&&S.syn.q.length&&Math.sin(t*8)>0?0xffb347:0x37d07a);});
+globalAnims.push((t,dt)=>{if(WV.synL)WV.synL.material.color.set(S.syn&&S.syn.q.length&&Math.sin(t*8)>0?0xffb347:0x37d07a);});
 /* ---- 🛒 商店：飼料、繁殖用品 ---- */
 const FEEDBUY={pellet:[20,80],insect:[20,100],brine:[20,90],veg:[10,60],mouse:[5,150],fm:[5,120]};
 const SHOPTABS=[['ani','動物'],['feed','🥫 飼料'],['gear','🧪 繁殖用品'],['up','設備升級']];
@@ -83,7 +83,7 @@ function pondVis(){if(!PV.g)return;const L=(S.wh||[]).map((w,i)=>({w,i})).filter
  L.forEach((o,i)=>{let f=PV.fish[i];if(!f||f.k!==o.w.sp){if(f)PV.g.remove(f.m);const d=dispGeo(o.w.sp);const m=new THREE.Mesh(d.g,new THREE.MeshStandardMaterial({vertexColors:true,roughness:.4,side:THREE.DoubleSide}));const len=clamp((SP[o.w.sp].len||.25)*((o.w.g&&o.w.g.sz)||1),.15,.9);m.scale.setScalar(len/d.len);
   const t=o.w.g&&o.w.g.m&&MORPH[o.w.g.m]&&MORPH[o.w.g.m].tint;if(t)m.material.color.setRGB(...t);PV.g.add(m);f=PV.fish[i]={m,k:o.w.sp,a:Math.random()*6,r:.6+Math.random()*1.4,sp:.25+Math.random()*.3,y:.12+Math.random()*.15};}});
  if(PV.boat&&PV.boatK!==S.boat){PV.g.remove(PV.boat);PV.boat=null;}if(!PV.boat&&S.boat){PV.boat=boatMesh(S.boat);PV.boat.position.copy(PV.boatAt);PV.boatK=S.boat;PV.g.add(PV.boat);}}
-globalAnims.push((dt,t)=>{if(!PV.pond)return;const P=PV.pond;PV.fish.forEach(f=>{f.a+=dt*f.sp;const x=P.x+Math.cos(f.a)*Math.min(f.r,P.w/2-.4)*.9,z=P.z+Math.sin(f.a)*Math.min(f.r*1.6,P.d/2-.5);f.m.position.set(x,f.y,z);f.m.rotation.y=-f.a-Math.PI/2*(f.sp>0?1:-1)+Math.PI;});});
+globalAnims.push((t,dt)=>{if(!PV.pond)return;const P=PV.pond;PV.fish.forEach(f=>{f.a+=dt*f.sp;const x=P.x+Math.cos(f.a)*Math.min(f.r,P.w/2-.4)*.9,z=P.z+Math.sin(f.a)*Math.min(f.r*1.6,P.d/2-.5);f.m.position.set(x,f.y,z);f.m.rotation.y=-f.a-Math.PI/2*(f.sp>0?1:-1)+Math.PI;});});
 setInterval(()=>{if(loaded)pondVis();},2000);
 function pondSheet(){const L=(S.wh||[]).map((w,i)=>({w,i})).filter(o=>isAquaSp(o.w.sp));
  sheet('🐟 倉庫活魚池',`<div class="mut sm" style="margin-bottom:6px">買來的魚、從船上帶回來的魚都會先養在這裡，看得到牠們在游。可以放進展缸、賣掉，或把小魚磨成「魚粉」拿去合成飼料。魚粉：<b>${S.fm||0}</b></div>`+
@@ -145,7 +145,12 @@ const TSTEPS=[
  {t:'缸多了照顧不完就雇員工：打開「地圖」→「👷 員工管理」，雇一個清潔員。薪水比多賺的門票少就划算。',ui:'#chips',ok:()=>staffN()>=1},
  {t:'到二樓水族展廳東邊的走廊，走進「二樓新翼」：繁殖、研究、保育都能賺大錢。',pos:()=>V(13.5,7,11.5),ok:()=>S.qs&&S.qs.f.wing},
  {t:'回到二樓東牆邊的「🏭 飼料合成機」：用魚粉、蔬菜自己做飼料，比用買的便宜。',pos:()=>V(10.9,7.8,3),ok:()=>TUT.f.syn},
- {t:'🎉 教學完成！之後跟著左上角的館長任務走，星等越高門票越多。釣魚是副業，出海要付費，大魚可以做標本加分。',man:1}];
+ {t:'🎣 支線：釣魚。打開「地圖」選一個釣場（溪釣最便宜），按甩竿，白線進到綠區時按「拉」。釣到的魚可以賣、帶回倉庫活魚池放進展缸，或做成標本。',ui:'#chips',ok:()=>Object.keys(S.fishLog||{}).length>=1},
+ {t:'🌱 支線：生態農園。到戶外南邊的「生態農園」種一株植物或蔬菜。長大可以賣錢，蔬菜還能餵動物、拿去合成飼料。',pos:()=>V(27,2,64),ok:()=>!!(S.gd&&[...(S.gd.plots||[]),...(S.gd.pots||[])].some(p=>p&&p.c))},
+ {t:'🧬 支線：基因實驗。按上面的「🧬 基因」，可以編輯動物的體色（紅化、黃金、螢光…）和體型。突變的動物比較值錢，放上市集也賣得比較好。',ui:'#chips',ok:()=>TUT.f.gene},
+ {t:'👥 支線：連線。打開「地圖」→「👥 誰在玩」參觀別人的館，可以按讚、送禮；「🏪 玩家市集」買賣動物；有船可以邀朋友一起出海，還能拿魚互打！',ui:'#chips',ok:()=>TUT.f.who},
+ {t:'🏢 二樓新翼太複雜的話，可以在「👷 員工管理」雇「🧪 繁殖助理」和「🦗 活餌員」，他們會自動幫你顧。離線的時候也不用擔心，蛋不會發霉、綠水不會崩缸。',man:1},
+ {t:'🎉 教學完成！之後跟著左上角的館長任務走，星等越高門票越多。',man:1}];
 const TV={};
 (function(){const g=new THREE.Group();const m=new THREE.MeshBasicMaterial({color:C(0xffb347),transparent:true,opacity:.95,depthTest:false});add(new THREE.ConeGeometry(.28,.6,12).rotateX(Math.PI),m,0,0,0,g);add(new THREE.CylinderGeometry(.09,.09,.5,8),m,0,.5,0,g);
  const r=add(new THREE.RingGeometry(.45,.6,24).rotateX(-Math.PI/2),new THREE.MeshBasicMaterial({color:C(0xffb347),transparent:true,opacity:.6,side:THREE.DoubleSide,depthTest:false}),0,-1.2,0,g);g.children.forEach(o=>o.renderOrder=30);g.visible=false;g.userData.dyn=1;scene.add(g);TV.a=g;TV.r=r;})();
@@ -159,10 +164,11 @@ function tutUI(){let d=document.getElementById('tutBox');if(!TUT.on){if(d)d.remo
  d.querySelector('#tutSk').onclick=()=>{tutEnd(false);toast('之後可以從地圖重新開始教學',2400);};const n=s.man&&d.querySelector('#tutN');if(n)n.onclick=tutNext;const b=s.btn&&d.querySelector('#tutB');if(b)b.onclick=s.btn[1];
  document.querySelectorAll('.tutHi').forEach(e=>e.classList.remove('tutHi'));if(s.ui){const e=document.querySelector(s.ui);if(e)e.classList.add('tutHi');}}
 {const st=document.createElement('style');st.textContent='@keyframes tutP{0%,100%{box-shadow:0 0 0 2px #ffb347}50%{box-shadow:0 0 0 6px rgba(255,179,71,.35)}}.tutHi{animation:tutP 1.2s infinite;border-radius:12px}';document.head.appendChild(st);}
-globalAnims.push((dt,t)=>{if(!TUT.on){if(TV.a)TV.a.visible=false;return;}const s=TSTEPS[TUT.i];if(!s)return;if(s.ok&&s.ok()){tutNext();return;}
+globalAnims.push((t,dt)=>{if(!TUT.on){if(TV.a)TV.a.visible=false;return;}const s=TSTEPS[TUT.i];if(!s)return;if(s.ok&&s.ok()){tutNext();return;}
  const p=s.pos?s.pos():null;TV.a.visible=!!p;const dir=document.getElementById('tutDir');if(!p){if(dir)dir.textContent='';return;}TV.a.position.set(p.x,p.y+Math.sin(t*3)*.15,p.z);TV.r.scale.setScalar(1+Math.sin(t*3)*.15);
  if(dir&&((t*4)|0)%2===0){const dx=p.x-player.x,dz=p.z-player.z,d=Math.hypot(dx,dz);const fx=-Math.sin(player.yaw),fz=-Math.cos(player.yaw);const fw=(dx*fx+dz*fz)/(d||1),rt=(dx*-fz+dz*fx)/(d||1);
   const lvlTxt=Math.abs(p.y-((player.y||0)+1.6))>2.5?(p.y>(player.y||0)+2?'・要上二樓':'・要下一樓'):'';dir.textContent=d<2.5?'📍 就在這裡！':`📍 目標在你${fw>.7?'正前方':fw<-.5?'後面':rt>0?'右邊':'左邊'} ${Math.round(d)} 公尺${lvlTxt}（看發亮的箭頭）`;}});
+const _whT=whoSheet;whoSheet=function(){TUT.f.who=1;return _whT();};
 const _msT=mapSheet;mapSheet=function(){_msT();if(typeof VISIT!=='undefined'&&VISIT)return;const c=$('#shC');if(!c)return;const b=document.createElement('button');b.className='btn';b.style.cssText='width:100%;margin-top:6px';b.textContent=TUT.on?'📘 新手教學進行中':'📘 新手教學（賺錢經營）';b.onclick=()=>{$('#sheet').classList.remove('open');tutStart(true);};c.insertBefore(b,c.children[2]||null);
  const f=document.createElement('button');f.className='btn';f.style.cssText='width:100%;margin-top:6px';f.textContent='💰 收支表';f.onclick=finSheet;c.insertBefore(f,c.children[3]||null);};
 setTimeout(()=>{if(!loaded||(typeof VISIT!=='undefined'&&VISIT))return;S.syn=S.syn||{q:[]};pondVis();if(S.tut&&S.tut.done)return;if(S.tut&&S.tut.i!=null){TUT.on=true;TUT.i=S.tut.i;tutSkipDone();tutUI();return;}if(tanksN()<3)tutStart(false);else{S.tut={done:1};markDirty();setTimeout(()=>toast('📘 地圖裡有新的「新手教學」和「💰 收支表」',4200),3000);}},5500);

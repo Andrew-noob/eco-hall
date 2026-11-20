@@ -20,31 +20,31 @@ function ensureLF(){ensureBF();S.lf=S.lf||{};const L=S.lf;L.st=L.st||{};for(cons
 const lfAdd=(k,n)=>{const L=ensureLF();L.st[k]=Math.min(L.st[k]+n,{nau:120,roti:200,cope:120,gut:150,worm:120,ff:200,pinky:40}[k]);};
 const lfUse=(k,n)=>{const L=ensureLF();if(L.st[k]>=n){L.st[k]-=n;return true;}return false;};
 /* ---- 時間推進 ---- */
-function lfTick(){if(!loaded||(typeof VISIT!=='undefined'&&VISIT))return;const L=ensureLF(),now=Date.now();const dt=Math.min((now-L.lt)/60000,720);L.lt=now;if(dt<=0)return;let ch=0;
+function lfTick(){if(!loaded||(typeof VISIT!=='undefined'&&VISIT))return;const L=ensureLF(),now=Date.now();const dt=Math.min((now-L.lt)/60000,720);L.lt=now;if(dt<=0)return;let ch=0;const off=dt>2;
  /* 豐年蝦孵化錐 */
- for(const c of L.br){if(c.st==='hatch'){const ok=inR(c.sal,[20,35])&&c.air;const sp=c.T>=26&&c.T<=30?1:c.T>=22&&c.T<=32?.55:.15;if(ok)c.p+=dt/2*sp;else c.bad=(c.bad||0)+dt;
+ for(const c of L.br){if(c.st==='hatch'){const ok=inR(c.sal,[20,35])&&c.air;const sp=c.T>=26&&c.T<=30?1:c.T>=22&&c.T<=32?.55:.15;if(ok||off)c.p+=dt/2*(ok?sp:1);else c.bad=(c.bad||0)+dt;
    if(c.bad>3){c.st='idle';toast(`💀 豐年蝦孵化錐：${!c.air?'沒有打氣，卵沉底悶死了':'鹽度不對，孵化失敗'}`,3600);ch=1;}
    if(c.p>=1){c.st='ready';c.t1=now;const rate=(c.dec?.85:.6)*(inR(c.sal,[25,30])?1:.8);c.n=Math.round(c.g*rate*12);toast(`🦐 豐年蝦孵出來了！約 ${c.n} 份無節幼體，6 分鐘內收成最營養`,4000);ch=1;}}
-  else if(c.st==='ready'&&now-c.t1>12*60e3){c.st='idle';toast('💀 孵出的豐年蝦太久沒收成，全死了',3200);ch=1;}}
+  else if(c.st==='ready'&&off){c.t1=now;}else if(c.st==='ready'&&now-c.t1>12*60e3){c.st='idle';toast('💀 孵出的豐年蝦太久沒收成，全死了',3200);ch=1;}}
  /* 浮游生物鏈：微藻 → 輪蟲、橈足類 */
  const P=L.pl;if(P.crash>0){P.crash-=dt;if(P.crash<=0){P.crash=0;}}else{const gr=(P.light?.35:-.08)*(P.fert>0?1.4:1)*(rsHas('plank')?1.4:1);P.alg=clamp(P.alg+gr*dt*P.alg*(1-P.alg/1.3)+(P.light?.01*dt:0),0,1.4);P.fert=Math.max(0,P.fert-dt);
   const eat=Math.min(P.alg,(P.roti*.004+P.cope*.006)*dt);P.alg-=eat;const food=P.alg>.15;P.roti=clamp(P.roti+(food?(P.roti>0?(P.roti*.5+2)*(rsHas('plank')?1.4:1):0):-P.roti*.3)*dt,0,400);P.cope=clamp(P.cope+(food?(P.cope>0?P.cope*.22+.6:0):-P.cope*.2)*dt,0,250);
-  if(P.alg>(rsHas('plank')?1.3:1.2)){P.over=(P.over||0)+dt;if(P.over>3){P.alg=.05;P.roti*=.2;P.cope*=.4;P.crash=2;P.over=0;toast('💀 綠水太濃「崩缸」了：藻類一夜死光，輪蟲也跟著死了大半',4800);ch=1;}}else P.over=0;}
+  if(off){P.alg=Math.min(P.alg,1);P.over=0;}if(P.alg>(rsHas('plank')?1.3:1.2)){P.over=(P.over||0)+dt;if(P.over>3){P.alg=.05;P.roti*=.2;P.cope*=.4;P.crash=2;P.over=0;toast('💀 綠水太濃「崩缸」了：藻類一夜死光，輪蟲也跟著死了大半',4800);ch=1;}}else P.over=0;}
  /* 蟋蟀 */
- const R=L.cr;if(R.ad>0){R.clean=Math.max(0,R.clean-dt*(2+R.ad/60));R.moist=Math.max(0,R.moist-dt*6);R.food=Math.max(0,R.food-dt);
+ const R=L.cr;if(off&&R.ad>0){R.clean=Math.max(R.clean-dt,50);R.moist=Math.max(R.moist-dt,60);R.food=Math.max(R.food,1);}if(R.ad>0&&!off){R.clean=Math.max(0,R.clean-dt*(2+R.ad/60));R.moist=Math.max(0,R.moist-dt*6);R.food=Math.max(0,R.food-dt);
   const ok=inR(R.T,[27,33])&&R.food>0;if(R.clean<25){const d=Math.ceil(R.ad*.15*dt);R.ad=Math.max(0,R.ad-d);if(d&&Math.random()<.3)toast('🦗 蟋蟀箱太臭（氨氣），蟋蟀一直死，快清理',3200);ch=1;}
   if(!R.food&&R.ad>0&&Math.random()<dt*.5){R.ad=Math.max(0,R.ad-Math.ceil(R.ad*.1));toast('🦗 蟋蟀沒東西吃，開始互相啃食',3000);ch=1;}
   R.lay=(R.lay||0)+(ok&&inR(R.moist,[50,85])?dt:0);if(R.lay>=2&&R.ad>=10){R.lay=0;R.eggs.push({t:0,n:Math.round(R.ad*.4)});ch=1;}}
- for(let i=R.eggs.length-1;i>=0;i--){const e=R.eggs[i];if(inR(R.moist,[45,90])&&inR(R.T,[26,34]))e.t+=dt;else if(R.moist<30)e.n=Math.round(e.n*(1-.3*dt));if(e.n<=0){R.eggs.splice(i,1);continue;}if(e.t>=3){R.eggs.splice(i,1);R.pin.push({t:0,n:e.n});toast(`🦗 蟋蟀卵孵化了，${e.n} 隻小蟋蟀`,2600);ch=1;}}
+ for(let i=R.eggs.length-1;i>=0;i--){const e=R.eggs[i];if(off||(inR(R.moist,[45,90])&&inR(R.T,[26,34])))e.t+=dt;else if(R.moist<30)e.n=Math.round(e.n*(1-.3*dt));if(e.n<=0){R.eggs.splice(i,1);continue;}if(e.t>=3){R.eggs.splice(i,1);R.pin.push({t:0,n:e.n});toast(`🦗 蟋蟀卵孵化了，${e.n} 隻小蟋蟀`,2600);ch=1;}}
  for(let i=R.pin.length-1;i>=0;i--){const e=R.pin[i];if(R.food>0)e.t+=dt;if(e.t>=4){R.pin.splice(i,1);R.ad=Math.min(400,R.ad+e.n);ch=1;}}
  /* 大麥蟲 */
  const W=L.sw;for(let i=W.cups.length-1;i>=0;i--){const c=W.cups[i];c.t+=dt;if(c.t>=5){W.cups.splice(i,1);W.bee++;ch=1;}}
  if(W.bee>=2){W.eggT+=dt*(W.bran>0?1:.3);if(W.eggT>=2){W.eggT=0;const n=W.bee*6;W.lar=Math.min(300,W.lar+n);toast(`🐛 大麥蟲甲蟲產卵，孵出 ${n} 隻小蟲`,2800);ch=1;}W.beeAge=(W.beeAge||0)+dt;if(W.beeAge>15){W.beeAge=0;W.bee=Math.max(0,W.bee-2);toast('🪲 兩隻大麥蟲甲蟲老死了',2400);ch=1;}}
- W.bran=Math.max(0,W.bran-dt*.5);if(W.lar>0&&W.bran<=0&&Math.random()<dt*.3){W.lar=Math.max(0,W.lar-Math.ceil(W.lar*.08));ch=1;}
+ W.bran=Math.max(off?1:0,W.bran-dt*.5);if(!off&&W.lar>0&&W.bran<=0&&Math.random()<dt*.3){W.lar=Math.max(0,W.lar-Math.ceil(W.lar*.08));ch=1;}
  /* 果蠅 */
- for(let i=L.ff.v.length-1;i>=0;i--){const v=L.ff.v[i];v.t+=dt*(L.ff.T>28?.6:L.ff.T<20?.5:1);if(L.ff.T>28)v.ster=1;if(v.t>16){L.ff.v.splice(i,1);toast('🪰 一瓶果蠅培養瓶衰退（長蟎了），丟掉了',2600);ch=1;}}
+ for(let i=L.ff.v.length-1;i>=0;i--){const v=L.ff.v[i];v.t+=dt*(L.ff.T>28?.6:L.ff.T<20?.5:1);if(off)v.t=Math.min(v.t,13);if(L.ff.T>28)v.ster=1;if(v.t>16){L.ff.v.splice(i,1);toast('🪰 一瓶果蠅培養瓶衰退（長蟎了），丟掉了',2600);ch=1;}}
  /* 鼠類 */
- const M=L.ms;if(M.trio){M.clean=Math.max(0,M.clean-dt*4);if(M.rest>0)M.rest-=dt;else if(!M.preg&&M.clean>30){M.preg=dt;}else if(M.preg){M.preg+=dt;if(M.preg>=3){M.preg=0;M.rest=1;const n=6+(Math.random()*5|0);if(M.clean<45){toast('🐁 鼠籠太髒，母鼠壓力太大，這胎沒有存活',3800);}else{M.lit.push({t:0,n});toast(`🐁 母鼠生了 ${n} 隻乳鼠`,2800);}ch=1;}}}
+ const M=L.ms;if(M.trio){M.clean=Math.max(off?60:0,M.clean-dt*4);if(M.rest>0)M.rest-=dt;else if(!M.preg&&M.clean>30){M.preg=dt;}else if(M.preg){M.preg+=dt;if(M.preg>=3){M.preg=0;M.rest=1;const n=6+(Math.random()*5|0);if(M.clean<45){toast('🐁 鼠籠太髒，母鼠壓力太大，這胎沒有存活',3800);}else{M.lit.push({t:0,n});toast(`🐁 母鼠生了 ${n} 隻乳鼠`,2800);}ch=1;}}}
  for(const l of M.lit)l.t+=dt;
  if(ch){markDirty();}lfVis();}
 /* ---- 動作 ---- */
@@ -150,7 +150,7 @@ wingLvl(function(){const g=WV.g,X=WG.x,Z=WG.z;const dk=new THREE.MeshStandardMat
 function lfVis(){if(!LV.br)return;const L=ensureLF();L.br.forEach((c,i)=>{LV.br[i].lq.visible=c.st!=='idle';LV.br[i].lq.material.color.set(c.st==='ready'?0xff8a3a:0xd27a3a);});
  const a=L.pl.crash>0?.05:L.pl.alg;LV.alg.forEach((m,i)=>{if(i<4){m.material.color.setRGB(.25+.1*(1-a),.4+.4*Math.min(1,a),.2);m.material.opacity=.35+.5*Math.min(1,a);}});
  LV.cups.forEach((m,i)=>m.visible=i<L.sw.cups.length);LV.ff.forEach((m,i)=>m.visible=i<L.ff.v.length);}
-globalAnims.push((dt,t)=>{if(!LV.br||!inWing())return;const L=S.lf;if(!L)return;LV.br.forEach((o,i)=>{const on=L.br[i]&&L.br[i].st==='hatch'&&L.br[i].air;o.bub.forEach((b,j)=>{b.visible=on;if(on){const y=((t*.8+j/6)%1);b.position.set(o.x+Math.sin(j*2+t)*.05,1.15+y*.75,-9.2+Math.cos(j*3)*.05);}});});});
+globalAnims.push((t,dt)=>{if(!LV.br||!inWing())return;const L=S.lf;if(!L)return;LV.br.forEach((o,i)=>{const on=L.br[i]&&L.br[i].st==='hatch'&&L.br[i].air;o.bub.forEach((b,j)=>{b.visible=on;if(on){const y=((t*.8+j/6)%1);b.position.set(o.x+Math.sin(j*2+t)*.05,1.15+y*.75,-9.2+Math.cos(j*3)*.05);}});});});
 /* 繁殖場總覽電腦加一個活餌捷徑 */
 const _bfs=bfSheet;bfSheet=function(tab){_bfs(tab);const c=$('#shC');if(!c)return;const d=document.createElement('div');d.className='mut sm';d.style.marginTop='8px';const L=ensureLF();d.innerHTML=`活餌庫存：${Object.entries(LFN).filter(([k])=>L.st[k]).map(([k,[i,n]])=>`${i}${n} ${L.st[k]}`).join('・')||'（空）'} <button class="btn sm" id="toLf">🦗 活餌區</button>`;c.appendChild(d);d.querySelector('#toLf').onclick=()=>lfSheet();};
 setInterval(lfTick,2000);setTimeout(()=>{if(loaded){ensureLF();lfVis();}},3200);

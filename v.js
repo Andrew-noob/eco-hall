@@ -93,7 +93,7 @@ MAKE.giso=seaBug('giso',.35,.04);MAKE.hcrab=seaBug('hcrab',.5,.05);
  const isl=new THREE.Group();isl.position.set(-44,0,28);scene.add(isl);box(2.2,.9,1.4,dark,0,.45,0,isl);const uvl=add(new THREE.BoxGeometry(2,.05,.08),new THREE.MeshBasicMaterial({color:C(0x7a3aff)}),0,1.7,0,isl);box(.06,.8,.06,dark,-.95,1.3,0,isl);box(.06,.8,.06,dark,.95,1.3,0,isl);
  const sc=bugMesh('scorp',{g:{m:'n'}});sc.g.scale.setScalar(4);sc.g.position.set(0,.9,0);isl.add(sc.g);const pl=add(new THREE.PlaneGeometry(1.8,.5),new THREE.MeshBasicMaterial({map:vText([['🔦 紫外線燈',40,.35],['點我開關',28,.75,'#c8a8ff']],420,120,'#141018','#ffffff')}),0,.6,.71,isl);
  STATIONS.push({p:V(-44,1.1,28.6),fn:()=>{UVON=!UVON;uvl.material.color.set(UVON?0xc8a0ff:0x3a2a5a);toast(UVON?'🔦 開啟紫外線燈：蠍子的外骨骼發出藍綠色螢光！外骨骼裡的「β-咔啉」會吸收紫外線再發出可見光。':'🔦 關掉紫外線燈',5200);}});
- globalAnims.push((dt,t)=>{const on=UVON||window.__night;sc.parts.m.emissive.set(on?0x10ffd0:0x000000);sc.parts.m.emissiveIntensity=on?.6:0;});
+ globalAnims.push((t,dt)=>{const on=UVON||window.__night;sc.parts.m.emissive.set(on?0x10ffd0:0x000000);sc.parts.m.emissiveIntensity=on?.6:0;});
  OBST.push([-45.3,-42.7,27.1,28.9]);AREAS.push([-51.6,-36.6,20.4,35.6],[-36.9,-35.3,21.6,23.2]);
  /* 展缸位置 */
  const NS=[{id:'a1',sz:'L',wall:V(-52,0,28),f:V(1,0,0)},{id:'a2',sz:'M',wall:V(-47.5,0,36),f:V(0,0,-1)},{id:'a3',sz:'M',wall:V(-41,0,36),f:V(0,0,-1)},

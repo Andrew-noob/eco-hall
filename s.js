@@ -63,7 +63,7 @@ function putBack(e){const k=e.sp;const tk=Object.values(TANKS).find(x=>spOK(k,x)
 function bfDeliver(k,g,sex){const nm=babyName(k,g);const tk=Object.values(TANKS).find(x=>spOK(k,x)&&used(x)+SP[k].cost<=SZ[x.sz].cap);
  if(tk){newAnimal(tk,k,{size:.3,g,sex,name:nm});logEv(tk.st,`繁殖場送來 ${sex} ${nm}`);return tName(tk);}S.wh.push({sp:k,g,sex,baby:1,name:nm});return '📦 倉庫';}
 /* ---- 時間推進 ---- */
-function bfTick(){if(!loaded||(typeof VISIT!=='undefined'&&VISIT))return;const b=ensureBF(),now=Date.now();let dt=Math.min((now-b.lt)/60000,720);b.lt=now;if(dt<=0)return;let ch=false;
+function bfTick(){if(!loaded||(typeof VISIT!=='undefined'&&VISIT))return;const b=ensureBF(),now=Date.now();let dt=Math.min((now-b.lt)/60000,720);b.lt=now;if(dt<=0)return;let ch=false;const off=dt>2;
  for(let i=0;i<boxN();i++){const x=b.box[i];if(x.st==='idle')continue;const r=BRE[x.sp];
   if(x.st==='cool'){if(inR(x.T,r.coolT)){x.p+=dt/r.cool;}if(x.p>=1){x.st='court';x.p=0;bfLog(`${SP[x.sp].n}降溫期結束，開始求偶`);toast(`💞 繁殖箱 ${i+1}：${SP[x.sp].n}降溫結束，把溫度調回 ${r.T[0]}–${r.T[1]}°C 讓牠們求偶`,4200);}ch=true;}
   else if(x.st==='court'){const ok=inR(x.T,r.T)&&(!r.H||inR(x.H,r.H));if(ok)x.p+=dt/r.court*(rsHas('eth')?1.5:1);if(x.p>=1){x.st='gest';x.p=0;x.trig=0;bfLog(`${SP[x.sp].n}交配成功`);if(r.cann&&!x.m.ai&&!x.m.dead&&Math.random()<r.cann){x.m.dead=1;bfLog(`母${SP[x.sp].n}把公的吃掉了`);setTimeout(()=>toast(`😱 繁殖箱 ${i+1}：交配後母${SP[x.sp].n}把公的吃掉了！（真的會發生）`,4800),1200);}toast(`🤰 繁殖箱 ${i+1}：${SP[x.sp].n}交配成功，${r.g==='live'?'懷孕了':'開始抱卵'}`,3600);}ch=true;}
@@ -71,9 +71,9 @@ function bfTick(){if(!loaded||(typeof VISIT!=='undefined'&&VISIT))return;const b
   else if(x.st==='rest'){x.p+=dt/4;if(x.p>=1){x.st='court';x.p=0;x.n=(x.n||0);toast(`😴 繁殖箱 ${i+1}：母${SP[x.sp].n}休養好了，可以再繁殖一窩`,3200);}ch=true;}}
  /* 孵蛋 */
  for(let i=b.eggs.length-1;i>=0;i--){const e=b.eggs[i],r=BRE[e.sp],c=b.inc[e.box||'A'];const dT=c.T<r.inc.T[0]?r.inc.T[0]-c.T:c.T>r.inc.T[1]?c.T-r.inc.T[1]:0;
-  if(dT>(rsHas('inc')?4:3)){e.hp-=dt*.6;}else e.p+=dt/r.inc.dur*(dT?.5:1)*(e.fert?1:0);
-  const vm=b.items&&b.items.verm?5:0;if(c.H<r.inc.H[0]-vm)e.dent+=dt*.25*(r.inc.H[0]-vm-c.H)/10;if(c.H>r.inc.H[1]+vm)e.mold+=dt*.3*(c.H-r.inc.H[1]-vm)/10;if(!e.fert&&e.t0+240e3<now)e.mold+=dt*.35;
-  if(e.mold>.5){for(const o of b.eggs)if(o!==e&&(o.box||'A')===(e.box||'A'))o.mold+=dt*.05;if(!b.mw||now-b.mw>180e3){b.mw=now;toast(`🦠 孵蛋室有蛋開始發霉了，去「照蛋」把無精蛋丟掉`,3800);}}
+  if(dT>(rsHas('inc')?4:3)){if(!off)e.hp-=dt*.6;}else e.p+=dt/r.inc.dur*(dT?.5:1)*(e.fert?1:0);
+  const vm=b.items&&b.items.verm?5:0;if(!off){if(c.H<r.inc.H[0]-vm)e.dent+=dt*.25*(r.inc.H[0]-vm-c.H)/10;if(c.H>r.inc.H[1]+vm)e.mold+=dt*.3*(c.H-r.inc.H[1]-vm)/10;if(!e.fert&&e.t0+240e3<now)e.mold+=dt*.35;}
+  if(e.mold>.5&&!off){for(const o of b.eggs)if(o!==e&&(o.box||'A')===(e.box||'A'))o.mold+=dt*.05;if(!b.mw||now-b.mw>180e3){b.mw=now;toast(`🦠 孵蛋室有蛋開始發霉了，去「照蛋」把無精蛋丟掉`,3800);}}
   if(e.dent>=1||e.mold>=1||e.hp<=0){b.eggs.splice(i,1);const why=e.hp<=0?'溫度不對':e.dent>=1?'太乾':'發霉';bfLog(`${SP[e.sp].n}的蛋壞了（${why}）`);(b._dead=b._dead||[]).push(why);ch=true;continue;}
   if(e.p>=1){b.eggs.splice(i,1);const sex=r.tsd?(Math.random()<r.tsd(c.T)?'♀':'♂'):(Math.random()<.5?'♀':'♂');const to=bfDeliver(e.sp,e.g,sex);bfLog(`孵出 ${sex} ${babyName(e.sp,e.g)}`);
    toast(`🐣 孵出 ${sex} ${babyName(e.sp,e.g)}${gTag({g:e.g})?'（'+gTag({g:e.g})+'）':''}，送到「${to}」`,4200);S.cons=S.cons||{};S.cons.bred=(S.cons.bred||0)+1;ch=true;}}
@@ -83,7 +83,7 @@ function bfTick(){if(!loaded||(typeof VISIT!=='undefined'&&VISIT))return;const b
   if(j.pol>0){if(inR(j.T,J.sT)){j.sc+=dt/3;if(j.sc>=1){j.sc=0;const st=Math.max(1,Math.round(j.pol*.3));let n=0;for(let q=0;q<st;q++)n+=3+(Math.random()*4|0);n=Math.min(n,30-j.eph.length);for(let q=0;q<n;q++)j.eph.push({t0:now,p:0,f:now});
      if(n>0){bfLog(`${J.sn}水螅體橫裂，放出 ${n} 隻碟狀幼體`);toast(`🪼 ${J.sn}的水螅體「橫裂」了！放出 ${n} 隻碟狀幼體，記得把水溫調回 ${J.nT}°C 並餵豐年蝦`,5200);}ch=true;}}
    else{j.sc=Math.max(0,j.sc-dt/6);if(Math.abs(j.T-J.nT)<=2&&j.fedT&&now-j.fedT<5*60e3){j.bud=(j.bud||0)+dt/2*(rsHas('cnid')?1.5:1);if(j.bud>=1){j.bud=0;const add=Math.max(1,Math.round(j.pol*.2));j.pol=Math.min(j.pol+add,polCap());ch=true;}}}}
-  for(let q=j.eph.length-1;q>=0;q--){const e=j.eph[q];const fedOK=now-e.f<4*60e3;if(fedOK&&Math.abs(j.T-J.nT)<=3)e.p+=dt/6;if(now-e.f>(rsHas('cnid')?12:8)*60e3){j.eph.splice(q,1);ch=true;continue;}
+  for(let q=j.eph.length-1;q>=0;q--){const e=j.eph[q];if(off)e.f=now;const fedOK=now-e.f<4*60e3;if(fedOK&&Math.abs(j.T-J.nT)<=3)e.p+=dt/6;if(now-e.f>(rsHas('cnid')?12:8)*60e3){j.eph.splice(q,1);ch=true;continue;}
    if(e.p>=1){j.eph.splice(q,1);const g={sz:+rnd(.85,1.15).toFixed(3),m:'n'};const to=bfDeliver(k,g,Math.random()<.5?'♀':'♂');j.done=(j.done||0)+1;S.cons=S.cons||{};S.cons.bred=(S.cons.bred||0)+1;
     toast(`🪼 一隻${J.sn}長成幼水母，送到「${to}」`,3200);ch=true;}}}
  if(ch){markDirty();bfVis();}}
@@ -150,13 +150,13 @@ function boxSheet(i){const b=ensureBF(),x=b.box[i];if(x.st==='idle'){bfSheet('bo
  const needs=r.need.map(k=>{const n=NEED[k];const ok=n.act?(x.st==='gest'?x.trig:null):has(k);return`<div class="row2"><span>${n.n} <span class="mut sm">${n.d}</span></span>${n.act?(x.st==='gest'?(x.trig?'<span>✅</span>':`<button class="btn sm feed" data-act="${k}">執行</button>`):'<span class="mut sm">懷孕期再做</span>'):ok?'<span>✅</span>':`<button class="btn sm" data-gs="1">缺少・去買</button>`}</div>`;}).join('');
  sheet(`🧪 繁殖箱 ${i+1}・${SP[x.sp].n}`,`<div class="sm" style="margin-bottom:6px;line-height:2">${steps}</div>
   <div class="res"><div><b>${STN[x.st]}</b> <span class="mut">${Math.round(x.p*100)}%</span></div><div class="mut sm">${x.st==='cool'?`溫度要維持在 ${r.coolT[0]}–${r.coolT[1]}°C，模擬冬天`:x.st==='court'?`溫度 ${r.T[0]}–${r.T[1]}°C${r.H?`、濕度 ${r.H[0]}–${r.H[1]}%`:''}，牠們才會求偶`:x.st==='gest'?`維持溫度，準備好下面的器材`:'母的產後要休養，之後可以再生一窩'}</div><span></span></div>
-  <div class="row2"><span>🌡 溫度 <b style="color:${okT?'#6fd38c':'#ff8a8a'}">${x.T}°C</b> <span class="mut sm">目標 ${tgt[0]}–${tgt[1]}</span></span><span><button class="btn sm" data-dt="-1">−</button><button class="btn sm" data-dt="1">＋</button></span></div>
+  <button class="btn feed" style="width:100%;margin-bottom:6px" data-auto="1">📋 照建議設定（溫度、濕度調到最適合）</button><div class="row2"><span>🌡 溫度 <b style="color:${okT?'#6fd38c':'#ff8a8a'}">${x.T}°C</b> <span class="mut sm">目標 ${tgt[0]}–${tgt[1]}</span></span><span><button class="btn sm" data-dt="-1">−</button><button class="btn sm" data-dt="1">＋</button></span></div>
   ${r.H&&x.st!=='cool'?`<div class="row2"><span>💧 濕度 <b style="color:${okH?'#6fd38c':'#ff8a8a'}">${x.H}%</b> <span class="mut sm">目標 ${r.H[0]}–${r.H[1]}</span></span><span><button class="btn sm" data-dh="-5">−</button><button class="btn sm" data-dh="5">＋</button></span></div>`:''}
   ${needs?`<h4 style="margin:10px 0 4px">需要的器材</h4>${needs}`:''}
   <div class="mut sm" style="margin:10px 0;line-height:1.6">📖 ${r.f}</div>
   <div style="display:flex;gap:6px"><button class="btn" style="flex:1" data-back="1">← 繁殖場</button><button class="btn" style="flex:1" data-end="1">結束，送回展示缸</button></div>`,
  c=>{c.querySelectorAll('[data-dt]').forEach(y=>y.onclick=()=>{x.T=clamp(x.T+ +y.dataset.dt,8,40);markDirty();boxSheet(i);});c.querySelectorAll('[data-dh]').forEach(y=>y.onclick=()=>{x.H=clamp(x.H+ +y.dataset.dh,10,100);markDirty();boxSheet(i);});
-  c.querySelectorAll('[data-gs]').forEach(y=>y.onclick=()=>shopSheet('gear'));c.querySelectorAll('[data-act]').forEach(y=>y.onclick=()=>{x.trig=1;markDirty();toast(y.dataset.act==='rain'?'🌧 灑水模擬大雨，蛙開始抱接':'🚿 大量換水，模擬春天的雨',3000);boxSheet(i);});
+  c.querySelectorAll('[data-gs]').forEach(y=>y.onclick=()=>shopSheet('gear'));{const au=c.querySelector('[data-auto]');if(au)au.onclick=()=>{const tg=x.st==='cool'?r.coolT:r.T;x.T=Math.round((tg[0]+tg[1])/2);if(r.H)x.H=Math.round((r.H[0]+r.H[1])/2/5)*5;markDirty();toast('📋 已調成建議的溫度和濕度',1600);boxSheet(i);};}c.querySelectorAll('[data-act]').forEach(y=>y.onclick=()=>{x.trig=1;markDirty();toast(y.dataset.act==='rain'?'🌧 灑水模擬大雨，蛙開始抱接':'🚿 大量換水，模擬春天的雨',3000);boxSheet(i);});
   c.querySelector('[data-back]').onclick=()=>bfSheet('box');c.querySelector('[data-end]').onclick=()=>{const a=putBack(x.f),m=putBack(x.m);b.box[i]={st:'idle'};markDirty();bfVis();toast(`🏠 ${SP[x.sp].n}回到「${a}」${m!==a?'、「'+m+'」':''}`,3200);bfSheet('box');};});}
 /* ---- 展示缸裡的繁殖：爬蟲改到繁殖場，水母改成生活史 ---- */
 const _cb2=checkBreed;checkBreed=function(tk){const st=tk.st,now=Date.now();st.brT=st.brT||{};ensureBF();
@@ -223,7 +223,7 @@ function bfVis(){if(!WV.boxes)return;const b=ensureBF();
   o.led.material.color.set(lock?0x111111:x.st==='idle'?0x3a4654:STC[x.st]);o.ani.visible=o.ani2.visible=!lock&&x.st!=='idle';});
  WV.inc.forEach(o=>{const n=b.eggs.filter(e=>(e.box||'A')===o.k).length,c=b.inc[o.k];const x=o.cv.getContext('2d');x.fillStyle='#0d1a24';x.fillRect(0,0,256,72);x.fillStyle='#ffb347';x.textAlign='center';x.font='700 26px "PingFang TC",sans-serif';x.fillText(`孵蛋箱 ${o.k}・${c.T}°C・${c.H}%`,128,30);x.fillStyle='#cfe';x.font='600 22px sans-serif';x.fillText(`${n} 顆蛋`,128,60);o.tx.needsUpdate=true;o.eggs.forEach((m,i)=>m.visible=i<n);});
  const pol=Object.values(b.jel).reduce((a,j)=>a+j.pol,0),eph=Object.values(b.jel).reduce((a,j)=>a+j.eph.length,0);WV.pol.forEach((m,i)=>m.visible=i<pol);WV.eph.forEach((m,i)=>m.visible=i<eph);}
-globalAnims.push((dt,t)=>{if(!WV.eph||!inWing())return;WV.eph.forEach((m,i)=>{if(!m.visible)return;const a=t*.35+i*2.39,r=.25+((i*37)%60)/100;m.position.set(Math.cos(a)*r,Math.sin(a)*r,-.05+((i*13)%10)/100);m.rotation.z=t*2+i;});
+globalAnims.push((t,dt)=>{if(!WV.eph||!inWing())return;WV.eph.forEach((m,i)=>{if(!m.visible)return;const a=t*.35+i*2.39,r=.25+((i*37)%60)/100;m.position.set(Math.cos(a)*r,Math.sin(a)*r,-.05+((i*13)%10)/100);m.rotation.z=t*2+i;});
  WV.boxes.forEach((o,i)=>{if(o.ani.visible){o.ani.position.x=-.1+Math.sin(t*.7+i)*.12;o.ani2.position.x=-.1+Math.cos(t*.6+i*2)*.12;}});});
 /* ---- 入口 ---- */
 const _ms5=mapSheet;mapSheet=function(){_ms5();if(typeof VISIT!=='undefined'&&VISIT)return;const c=$('#shC'),b=document.createElement('button');b.className='btn';b.style.cssText='width:100%;margin-top:6px';b.textContent=inWing()?'🏛 回二樓':'🏢 二樓新翼：繁殖場・水母・孵蛋室';b.onclick=()=>{$('#sheet').classList.remove('open');inWing()?leaveWing():goWing();};c.insertBefore(b,c.children[1]||null);};

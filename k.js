@@ -133,7 +133,7 @@ const GD={beds:[],pots:[]};
    b.pl.forEach(g=>{g.scale.setScalar(.15+.85*p.g);g.children.forEach(m=>{if(m.userData.fruit)m.visible=p.g>.75;});});});
   S.gd.pots.forEach((p,i)=>{const o=GD.pots[i],key=p.c?p.c+(p.v?1:0):null;if(o.k!==key){o.k=key;for(let q=o.g.children.length-1;q>=0;q--)o.g.remove(o.g.children[q]);if(p.c)add(sg(p.c,p.v?1:0),plantM,0,0,0,o.g);}o.g.scale.setScalar(1.5*(.3+.7*p.g));});};
  let ac=0;globalAnims.push((t,dt)=>{if(!loaded)return;ac+=dt;if(ac<1)return;ac=0;tickGarden();window.__gdSync();});
- SPOTS.push(['🌱 生態農園',()=>Object.assign(player,{x:GX,y:0,z:60.5,yaw:Math.PI,pitch:-.25})]);
+ SPOTS.push(['🌱 生態農園',()=>Object.assign(player,{x:GX,y:0,z:61,yaw:Math.PI,pitch:-.25})]);
  const _bar5=bar;bar=function(){_bar5();if(lvl()!==0||window.__ride)return;if(player.x>20.5&&player.x<34&&player.z>60&&player.z<83){near=null;lastNear=null;ensureGarden();$('#bar').style.display='block';$('#bT').textContent='🌱 生態農園';
   const rd=S.gd.plots.filter(p=>p.c&&p.g>=1).length+S.gd.pots.filter(p=>p.c&&p.g>=1).length,dry=S.gd.plots.filter(p=>p.c&&p.g<1&&!wetFor(p)).length;$('#bD').textContent=`可收成 ${rd}・需要澆水 ${dry}・倉庫作物 ${Object.values(S.crop).reduce((a,b)=>a+b,0)}`;
   if(lastBtns!=='gd'){lastBtns='gd';const bb=$('#bB');bb.innerHTML='';for(const [t,f,c] of[['🥕 菜田',()=>gardenSheet(),'feed'],['🪴 多肉',()=>succSheet(),''],['🧺 作物',()=>cropSheet(),'']]){const x=document.createElement('button');x.className='btn '+c;x.textContent=t;x.onclick=f;bb.appendChild(x);}}}};})();

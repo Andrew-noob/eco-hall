@@ -570,7 +570,7 @@ function loop(){requestAnimationFrame(loop);const dt=Math.min(clock.getDelta(),.
    if(tk.cyl){const dx=lp.x,dz=lp.z-tk.cz,l=Math.hypot(dx,dz)||1;tk.attract=V(dx/l*tk.r*.62,clamp(lp.y,tk.box.min.y+.1,tk.box.max.y-.1),tk.cz+dz/l*tk.r*.62);}
    else if(tk.box&&!tk.walk){const b=tk.box,p=b.clampPoint(lp,V());if(s.sz==='PD'||s.sz==='R')p.y=b.max.y-.08;else p.z=b.max.z-.02;if(tk.confine)tk.confine(p,.4);tk.attract=p;}
    else if(tk.walk){const p=tk.walk.clampPoint(lp,V());if((s.sz!=='PEN'&&s.sz!=='AV'))p.z=tk.walk.max.z-.04;p.y=tk.groundY(p.x,p.z);tk.attract=p;}}
-  for(const c of tk.creatures){c.update(dt,t);if(c.beg>0)c.beg-=dt;}for(const a of tk.anims)a(t,dt);if(tk.food)tk.food.update(dt,t);if(tk.tfood)tk.tfood.update(dt,t);
+  if(tk.group.visible!==false){for(const c of tk.creatures){c.update(dt,t);if(c.beg>0)c.beg-=dt;}for(const a of tk.anims)a(t,dt);if(tk.food)tk.food.update(dt,t);if(tk.tfood)tk.tfood.update(dt,t);}
   st.clean=Math.max(0,st.clean-.015*dt);const dirt=1-st.clean/100;const d=ENVDEF[st.type];if(d&&d.hb!=null)st.hum+=(d.hb-st.hum)*dt*.002;
   if(tk.u){tk.u.wc.value.copy(tk.wc0).lerp(C(0x4a5a2a),dirt*.6);tk.u.den.value=tk.den0*(1+dirt*1.6);}if(tk.smudge){tk.fogT=Math.max(0,(tk.fogT||0)-dt*.08);tk.smudge.material.opacity=Math.max(dirt*.32,tk.fogT*.35);tk.smudge.material.color.setRGB(.6+.35*tk.fogT,.6+.35*tk.fogT,.5+.45*tk.fogT);}
   const over=used(tk)>SZ[s.sz].cap;

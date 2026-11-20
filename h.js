@@ -54,17 +54,17 @@ $('#pSell').onclick=()=>{if(!sel)return;const e=sel.entry,b=$('#pSell'),v=sellPr
 
 /* ---------- 倉庫建築與送貨卡車（戶外東側） ---------- */
 (function(){const wx=30,wz=48;const wall=new THREE.MeshStandardMaterial({color:C(0x8a9096),roughness:.6,metalness:.3,normalMap:rep(scaleN,20,6),normalScale:new THREE.Vector2(.15,.15)}),dark=new THREE.MeshStandardMaterial({color:C(0x2a2e33),roughness:.4,metalness:.6});
- const fl=add(new THREE.PlaneGeometry(10,20),new THREE.MeshStandardMaterial({color:C(0x9a9a96),roughness:.7}),wx,.008,wz+5);fl.rotation.x=-Math.PI/2;
- box(10.2,4.5,.2,wall,wx,2.25,wz+15);box(10.2,4.5,.2,wall,wx,2.25,wz-5);box(.2,4.5,20,wall,wx+5,2.25,wz+5);box(.2,4.5,10,wall,wx-5,2.25,wz+10);box(.2,4.5,2,wall,wx-5,2.25,wz-4);box(.2,4.5,2,wall,wx-5,2.25,wz+4);box(.2,1.3,6,wall,wx-5,3.85,wz);
- box(10.6,.25,20.6,dark,wx,4.6,wz+5);for(let z=-4;z<=14;z+=2)box(.14,.14,10,dark,wx,4.4,wz+z).rotation.y=Math.PI/2;
+ const fl=add(new THREE.PlaneGeometry(10,16.5),new THREE.MeshStandardMaterial({color:C(0x9a9a96),roughness:.7}),wx,.008,wz+3.25);fl.rotation.x=-Math.PI/2;
+ box(10.2,4.5,.2,wall,wx,2.25,wz+11.5);box(10.2,4.5,.2,wall,wx,2.25,wz-5);box(.2,4.5,16.5,wall,wx+5,2.25,wz+3.25);box(.2,4.5,6.5,wall,wx-5,2.25,wz+8.25);box(.2,4.5,2,wall,wx-5,2.25,wz-4);box(.2,4.5,2,wall,wx-5,2.25,wz+4);box(.2,1.3,6,wall,wx-5,3.85,wz);
+ box(10.6,.25,17.1,dark,wx,4.6,wz+3.25);for(let z=-4;z<=10;z+=2)box(.14,.14,10,dark,wx,4.4,wz+z).rotation.y=Math.PI/2;
  box(.3,3.4,.3,new THREE.MeshStandardMaterial({color:C(0xe8c030)}),wx-5.05,1.7,wz-3);box(.3,3.4,.3,new THREE.MeshStandardMaterial({color:C(0xe8c030)}),wx-5.05,1.7,wz+3);
  const sg=add(new THREE.PlaneGeometry(4.2,.9),new THREE.MeshBasicMaterial({map:vText([['📦 倉庫・送貨區',56,.42],['WAREHOUSE & DELIVERY',24,.83,'#ffd27a']],700,150,'#1a1a10','#f6efe0')}),wx-5.12,3.9,wz);sg.rotation.y=-Math.PI/2;
- for(const [x,z] of[[-2,-3.5],[2,-3.5],[0,3.6],[-2,9],[2,12]])glow(wx+x,4.2,wz+z,1.6,0xfff4e0,.7);
+ for(const [x,z] of[[-2,-3.5],[2,-3.5],[0,3.6],[-2,8],[2,9.5]])glow(wx+x,4.2,wz+z,1.6,0xfff4e0,.7);
  const shelfM=new THREE.MeshStandardMaterial({color:C(0x3a5a8a),roughness:.5,metalness:.4});for(const z of[-3,0,3]){box(1.2,.06,2.4,shelfM,wx+4,1,wz+z);box(1.2,.06,2.4,shelfM,wx+4,2.2,wz+z);for(const dz of[-1.15,1.15])for(const dx of[-.55,.55])box(.06,2.6,.06,shelfM,wx+4+dx,1.3,wz+z+dz);}
  const crateM=new THREE.MeshStandardMaterial({color:C(0xb88a50),roughness:.8,normalMap:rep(scaleN,1,6),normalScale:new THREE.Vector2(.3,.3)});const crates=[];
  for(let i=0;i<12;i++){const sh=Math.floor(i/4),lv=(i%4)<2?1:2.2,c=box(.6,.5,.7,crateM,wx+4,lv+.3,wz-3+sh*3+((i%2)?.45:-.45));c.visible=false;crates.push(c);}
  for(let i=0;i<6;i++){const s=add(new THREE.CylinderGeometry(.3,.34,.7,12),new THREE.MeshStandardMaterial({color:C([0xd8c8a0,0xc0a878][i%2]),roughness:1}),wx-2+(i%3)*.7,.35,wz-4+Math.floor(i/3)*.7);}
- OBST.push([wx-5.15,wx+5.15,wz+14.85,wz+15.15],[wx-5.15,wx+5.15,wz-5.15,wz-4.85],[wx+4.85,wx+5.15,wz-5,wz+15],[wx-5.15,wx-4.85,wz+5,wz+15],[wx-5.15,wx-4.85,wz-5,wz-3],[wx-5.15,wx-4.85,wz+3,wz+5],[wx+3.3,wx+4.7,wz-4.3,wz+4.3],[wx-2.4,wx,wz-4.4,wz-3.2]);
+ OBST.push([wx-5.15,wx+5.15,wz+11.35,wz+11.65],[wx-5.15,wx+5.15,wz-5.15,wz-4.85],[wx+4.85,wx+5.15,wz-5,wz+11.5],[wx-5.15,wx-4.85,wz+5,wz+11.5],[wx-5.15,wx-4.85,wz-5,wz-3],[wx-5.15,wx-4.85,wz+3,wz+5],[wx+3.3,wx+4.7,wz-4.3,wz+4.3],[wx-2.4,wx,wz-4.4,wz-3.2]);
  const truck=new THREE.Group();scene.add(truck);const tcol=new THREE.MeshStandardMaterial({color:C(0x2f7ad0),roughness:.35,metalness:.3}),tw=new THREE.MeshStandardMaterial({color:C(0xf2f2f2),roughness:.5});
  box(2.2,2.2,4.2,tw,0,1.6,-.6,truck);box(2.2,1.6,1.6,tcol,0,1.3,2.4,truck);const ws=add(new THREE.PlaneGeometry(1.9,.7),new THREE.MeshPhysicalMaterial({color:0x223344,roughness:.05,metalness:.2}),0,1.7,3.21,truck);
  for(const [x,z] of[[-1.05,-1.8],[1.05,-1.8],[-1.05,2.3],[1.05,2.3]]){const w=add(new THREE.CylinderGeometry(.42,.42,.3,16).rotateZ(Math.PI/2),dark,x,.42,z,truck);}
@@ -77,6 +77,6 @@ $('#pSell').onclick=()=>{if(!sel)return;const e=sel.entry,b=$('#pSell'),v=sellPr
    if(got.length){markDirty();window.__truckGo();toast(`🚚 ${got.map(k=>SP[k].n).join('、')} 送達倉庫（魚會放在倉庫的活魚池），去倉庫放進展缸吧`,4200);}
    crates.forEach((c,i)=>c.visible=i<(S.wh||[]).filter(w=>!(SP[w.sp]&&HT[SP[w.sp].hab]&&HT[SP[w.sp].hab].aqua)).length);updMoney();}});
  SPOTS.push(['📦 倉庫',()=>Object.assign(player,{x:23,y:0,z:48,yaw:-Math.PI/2,pitch:-.05})]);
- const _bar3=bar;bar=function(){_bar3();if(lvl()!==0||window.__ride)return;if(player.x>wx-7&&player.x<wx+5&&player.z>wz-6&&player.z<wz+15){near=null;lastNear=null;$('#bar').style.display='block';$('#bT').textContent='📦 倉庫・送貨區';$('#bD').textContent=`待安置 ${(S.wh||[]).length} 箱・運送中 ${(S.orders||[]).length}・${fmt$(S.money||0)}`;
+ const _bar3=bar;bar=function(){_bar3();if(lvl()!==0||window.__ride)return;if(player.x>wx-7&&player.x<wx+5&&player.z>wz-6&&player.z<wz+11.4){near=null;lastNear=null;$('#bar').style.display='block';$('#bT').textContent='📦 倉庫・送貨區';$('#bD').textContent=`待安置 ${(S.wh||[]).length} 箱・運送中 ${(S.orders||[]).length}・${fmt$(S.money||0)}`;
   if(lastBtns!=='wh'){lastBtns='wh';const bb=$('#bB');bb.innerHTML='';for(const [t,f,c] of[['📦 倉庫',whSheet,'feed'],['🐟 活魚池',()=>pondSheet(),''],['⛵ 我的船',()=>boatSheet(),'']]){const x=document.createElement('button');x.className='btn '+c;x.textContent=t;x.onclick=f;bb.appendChild(x);}}}};})();
 const _rc2=refreshChips;refreshChips=function(){_rc2();ensureEco();const ch=$('#chips'),b=document.createElement('button');b.className='chip';b.id='moneyChip';b.style.fontWeight='700';b.onclick=()=>shopSheet('ani');ch.insertBefore(b,ch.children[1]||null);updMoney();};

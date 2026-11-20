@@ -32,7 +32,7 @@ function mkAvatar(id,v){const g=new THREE.Group();const col=new THREE.Color().se
  const arm=new THREE.Group();arm.position.set(.28,1.05,0);g.add(arm);const host=id===LIVE.host;
  const nm=new THREE.Sprite(new THREE.SpriteMaterial({map:nameTex(v.n||'玩家',host),depthTest:false,transparent:true}));nm.scale.set(1.2,.3,1);nm.position.y=1.85;nm.renderOrder=20;g.add(nm);
  const em=new THREE.Sprite(new THREE.SpriteMaterial({transparent:true,depthTest:false}));em.scale.set(.5,.5,1);em.position.y=2.3;em.visible=false;em.renderOrder=21;g.add(em);
- g.position.set(v.x,v.y||0,v.z);g.rotation.y=v.r||0;scene.add(g);return{g,nm,em,arm,n:v.n,tgt:{x:v.x,y:v.y||0,z:v.z,r:v.r||0},ph:0,et:0,ct:0,st:0,w:null,sw:0};}
+ g.userData.dyn=1;g.position.set(v.x,v.y||0,v.z);g.rotation.y=v.r||0;scene.add(g);return{g,nm,em,arm,n:v.n,tgt:{x:v.x,y:v.y||0,z:v.z,r:v.r||0},ph:0,et:0,ct:0,st:0,w:null,sw:0};}
 function liveUpd(id,v,added){if(!v||id===LIVE.uid)return;if(Date.now()-(v.t||0)>600e3)return;let a=LIVE.av[id];
  if(!a){a=LIVE.av[id]=mkAvatar(id,v);if(added&&Date.now()-v.t<120e3){const sea=LIVE.room.startsWith('sea_');if(sea)toast(id===LIVE.host?`⚓ 船長 ${v.n||''} 在船上`:`⛵ ${v.n||'有人'} 上船了！`,3200);else if(!VISIT)toast(`👋 ${v.n||'有人'} 來參觀你的館了！`,4200);else toast(id===LIVE.host?`🏠 館主 ${v.n||''} 在線上，就在館裡`:`👥 ${v.n||'有人'} 也在這裡參觀`,3600);}liveHud();}
  if(v.n&&v.n!==a.n){a.n=v.n;a.nm.material.map=nameTex(v.n,id===LIVE.host);}a.tgt={x:v.x,y:v.y||0,z:v.z,r:v.r||0};

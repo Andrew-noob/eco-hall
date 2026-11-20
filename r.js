@@ -80,7 +80,7 @@ async function lbSheet(tab='big'){sheet('🏆 全服釣魚排行榜','<div class
   <div class="mut sm" style="margin-bottom:6px">${o.canW?(S.nick?`你的暱稱：${esc(S.nick)}・釣到新紀錄會自動更新`:'設定暱稱後就會上榜'):'你目前只有瀏覽權限，可以看榜但不能上傳（要請擁有者把你設成「Contributor」）'}</div>${rows}
   ${o.canW?`<button class="btn" id="lbN" style="width:100%;margin-top:8px">${S.nick?'改暱稱':'設定暱稱並上榜'}</button>`:''}`,c=>{c.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>lbSheet(b.dataset.t));const n=c.querySelector('#lbN');if(n)n.onclick=async()=>{S.nick='';nick();await lbPush();lbSheet(tab);};});}
 /* 玩家市集：上架任何動物，顯示行情價 */
-const mkEst=(sp,g)=>Math.round((PRICE[sp]||100)*(g&&g.m?geneMul(g):1));
+const mkEst=(sp,g)=>typeof estVal==='function'?estVal(sp,g):Math.round((PRICE[sp]||100)*(g&&g.m?geneMul(g):1));
 const isSpecial=g=>g&&(g.m!=='n'||g.sz>=1.3||g.sz<=.7);
 async function settleMarket(){const o=await onInit();if(!o.ready)return;try{const me=await o.db.doc('mkt/'+o.uid).get();if(!me.exists)return;const my=(me.data().items||[]).slice();if(!my.length)return;
  const bs=await o.db.collection('buys').limit(500).get();S.settled=S.settled||{};let got=0,n=0;const sold=new Set();for(const d of bs.docs)for(const it of(d.data().items||[]))if(it.seller===o.uid)sold.add(it.iid);

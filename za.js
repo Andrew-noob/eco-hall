@@ -62,7 +62,7 @@ const _shZ=shopSheet;shopSheet=function(tab='ani'){ensureEco();ensureStock();ens
 /* ---- 📦 倉庫：活魚池、我的船 ---- */
 const isAquaSp=k=>!!(SP[k]&&HT[SP[k].hab]&&HT[SP[k].hab].aqua);
 const PV={fish:[]};
-function boatMesh(k){const g=new THREE.Group();const B=BOATS[k];if(!B||k==='rent')return g;const L={skiff:4.2,cruiser:5.6,yacht:7}[k],W={skiff:1.6,cruiser:2,yacht:2.3}[k];
+function boatMesh(k){const g=new THREE.Group();const B=BOATS[k];if(!B||k==='rent')return g;const L={skiff:4.2,cruiser:5.3,yacht:6.3}[k],W={skiff:1.6,cruiser:2,yacht:2.3}[k];
  const hc={skiff:0xf2f2f2,cruiser:0x2f7ad0,yacht:0x1a2a3a}[k];const hm=new THREE.MeshStandardMaterial({color:C(hc),roughness:.35,metalness:.2});
  box(W,.8,L*.75,hm,0,.9,-L*.1,g);const bow=add(new THREE.ConeGeometry(W*.55,L*.3,4),hm,0,.9,L*.4,g);bow.rotation.x=Math.PI/2;bow.rotation.y=Math.PI/4;bow.scale.set(1,1,.5);
  box(W*.95,.06,L*.7,new THREE.MeshStandardMaterial({color:C(0xc8a878)}),0,1.32,-L*.1,g);box(W*.7,.9,L*.25,new THREE.MeshStandardMaterial({color:C(0xf6f6f6)}),0,1.8,-L*.05,g);
@@ -70,14 +70,14 @@ function boatMesh(k){const g=new THREE.Group();const B=BOATS[k];if(!B||k==='rent
  if(k!=='skiff'){add(cylBetween(V(0,2.25,-L*.05),V(0,3.3,-L*.05),.03,.03),new THREE.MeshStandardMaterial({color:C(0xcccccc)}),0,0,0,g);}
  for(const s of[-1,1])box(.1,.5,L*.5,new THREE.MeshStandardMaterial({color:C(0x333333)}),s*W*.35,.25,-L*.1,g);return g;}
 (function(){const wx=30,wz=48;const g=new THREE.Group();scene.add(g);PV.g=g;
- const rim=new THREE.MeshStandardMaterial({color:C(0x5a6068),roughness:.6});const px=27.8,pz=58,pw=4.4,pd=7;
+ const rim=new THREE.MeshStandardMaterial({color:C(0x5a6068),roughness:.6});const px=27.8,pz=55.9,pw=4.4,pd=4.6;
  box(pw+.3,.45,.15,rim,px,.22,pz-pd/2,g);box(pw+.3,.45,.15,rim,px,.22,pz+pd/2,g);box(.15,.45,pd,rim,px-pw/2,.22,pz,g);box(.15,.45,pd,rim,px+pw/2,.22,pz,g);
  box(pw,.02,pd,new THREE.MeshStandardMaterial({color:C(0x2a4a5a)}),px,.02,pz,g);const wt=box(pw,.02,pd,new THREE.MeshStandardMaterial({color:C(0x3a8ac8),transparent:true,opacity:.55,roughness:.1,depthWrite:false}),px,.36,pz,g);
  PV.pond={x:px,z:pz,w:pw,d:pd};OBST.push([px-pw/2-.15,px+pw/2+.15,pz-pd/2-.15,pz+pd/2+.15]);
  const s1=add(new THREE.PlaneGeometry(2.4,.5),new THREE.MeshBasicMaterial({map:vText([['🐟 活魚池',48,.5]],480,100,'#0b1a24','#bfe6ff')}),px,2.2,pz-pd/2-.2,g);s1.rotation.y=Math.PI;
  const s2=add(new THREE.PlaneGeometry(2.4,.5),new THREE.MeshBasicMaterial({map:vText([['⛵ 我的船',48,.5]],480,100,'#0b1a24','#ffd27a')}),32.6,3.4,53.3,g);s2.rotation.y=Math.PI;
- box(2.4,.25,7.4,new THREE.MeshStandardMaterial({color:C(0x444a52),metalness:.5}),32.6,.12,58.4,g);PV.boatAt=V(32.6,.2,58.4);OBST.push([31.3,33.9,54.6,62.2]);
- STATIONS.push({p:V(px,.6,pz),fn:()=>pondSheet()},{p:V(32.6,1.5,58.4),fn:()=>boatSheet()});})();
+ box(2.4,.25,6.6,new THREE.MeshStandardMaterial({color:C(0x444a52),metalness:.5}),32.6,.12,56.1,g);PV.boatAt=V(32.6,.2,56.1);OBST.push([31.3,33.9,52.7,59.5]);
+ STATIONS.push({p:V(px,.6,pz),fn:()=>pondSheet()},{p:V(32.6,1.5,56.1),fn:()=>boatSheet()});})();
 function pondVis(){if(!PV.g)return;const L=(S.wh||[]).map((w,i)=>({w,i})).filter(o=>isAquaSp(o.w.sp)).slice(0,16);
  while(PV.fish.length>L.length){const f=PV.fish.pop();PV.g.remove(f.m);}
  L.forEach((o,i)=>{let f=PV.fish[i];if(!f||f.k!==o.w.sp){if(f)PV.g.remove(f.m);const d=dispGeo(o.w.sp);const m=new THREE.Mesh(d.g,new THREE.MeshStandardMaterial({vertexColors:true,roughness:.4,side:THREE.DoubleSide}));const len=clamp((SP[o.w.sp].len||.25)*((o.w.g&&o.w.g.sz)||1),.15,.9);m.scale.setScalar(len/d.len);
@@ -97,6 +97,8 @@ function pondPlace(it){if(!it)return;const ds=Object.values(TANKS).filter(k=>spO
  sheet(`🐟 ${esc(it.name||SP[it.sp].n)} 要放哪一缸？`,ds.map((k,i)=>`<button class="opt" data-d="${i}"><b>${esc(k.st.name||HT[k.st.type].n)}</b><span class="mut">空間 ${used(k)}/${SZ[k.sz].cap}・${k.st.animals.length} 隻</span></button>`).join(''),
   c=>c.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{placeIn(it,ds[+b.dataset.d]);markDirty();pondVis();toast(`🐟 放進「${ds[+b.dataset.d].st.name||HT[ds[+b.dataset.d].st.type].n}」`,2000);pondSheet();}));}
 {const _wv=whVal;whVal=it=>isAquaSp(it.sp)?fishVal(it.sp,it.g||{sz:1,m:'n'}):_wv(it);}
+/* 市集行情價：跟活魚池、倉庫用同一套價格（不受當天賣太多的影響） */
+function estVal(sp,g){g=g||{sz:1,m:'n'};if(isAquaSp(sp)&&!BOSS[sp])return Math.round(fPrice(sp)*Math.pow(clamp(g.sz||1,.75,1.6),2)*Math.min(2,((MORPH[g.m]||MORPH.n).mul)||1));return Math.round((PRICE[sp]||100)*.8*(g.m?geneMul(g):1));}
 /* ---- 靠近顯示管理卡：二樓新翼所有設施 ---- */
 (function(){const X=WG.x,Z=WG.z,W=(x,z)=>[X+x,Z+z];const add2=(n,d,p,fn,b)=>FAC.push({n,d,p,fn,b});
  for(let q=0;q<4;q++)add2(`🧪 繁殖箱 ${q+1}・${q+5}`,'放一對動物、調溫度濕度、看繁殖進度',W(-9.6,-5.4+q*2.6),()=>{const b=ensureBF();const i=[q,q+4].find(i=>i<boxN()&&b.box[i].st!=='idle');if(i!=null)boxSheet(i);else bfSheet('box');},'管理繁殖箱');
@@ -146,7 +148,7 @@ const TSTEPS=[
  {t:'🎉 教學完成！之後跟著左上角的館長任務走，星等越高門票越多。釣魚是副業，出海要付費，大魚可以做標本加分。',man:1}];
 const TV={};
 (function(){const g=new THREE.Group();const m=new THREE.MeshBasicMaterial({color:C(0xffb347),transparent:true,opacity:.95,depthTest:false});add(new THREE.ConeGeometry(.28,.6,12).rotateX(Math.PI),m,0,0,0,g);add(new THREE.CylinderGeometry(.09,.09,.5,8),m,0,.5,0,g);
- const r=add(new THREE.RingGeometry(.45,.6,24).rotateX(-Math.PI/2),new THREE.MeshBasicMaterial({color:C(0xffb347),transparent:true,opacity:.6,side:THREE.DoubleSide,depthTest:false}),0,-1.2,0,g);g.children.forEach(o=>o.renderOrder=30);g.visible=false;scene.add(g);TV.a=g;TV.r=r;})();
+ const r=add(new THREE.RingGeometry(.45,.6,24).rotateX(-Math.PI/2),new THREE.MeshBasicMaterial({color:C(0xffb347),transparent:true,opacity:.6,side:THREE.DoubleSide,depthTest:false}),0,-1.2,0,g);g.children.forEach(o=>o.renderOrder=30);g.visible=false;g.userData.dyn=1;scene.add(g);TV.a=g;TV.r=r;})();
 function tutStart(force){S.tut={i:0,done:0};TUT.on=true;TUT.i=0;tutSkipDone();tutUI();if(force)toast('📘 新手教學開始',1600);markDirty();}
 function tutSkipDone(){while(TUT.i<TSTEPS.length-1){const s=TSTEPS[TUT.i];if(s.man&&TUT.i===0)break;if(!s.man&&s.ok&&s.ok()){TUT.i++;continue;}break;}if(TSTEPS[TUT.i]&&TSTEPS[TUT.i].ok&&TUT.i===5)TUT.fed0=(S.qs&&S.qs.f.fed)||0;}
 function tutNext(){TUT.i++;if(S.tut)S.tut.i=TUT.i;if(TUT.i>=TSTEPS.length){tutEnd(true);return;}if(TUT.i<TSTEPS.length-1)earn(300);if(TUT.i===5)TUT.fed0=(S.qs&&S.qs.f.fed)||0;markDirty();tutSkipDone();tutUI();}
@@ -165,4 +167,4 @@ const _msT=mapSheet;mapSheet=function(){_msT();if(typeof VISIT!=='undefined'&&VI
  const f=document.createElement('button');f.className='btn';f.style.cssText='width:100%;margin-top:6px';f.textContent='💰 收支表';f.onclick=finSheet;c.insertBefore(f,c.children[3]||null);};
 setTimeout(()=>{if(!loaded||(typeof VISIT!=='undefined'&&VISIT))return;S.syn=S.syn||{q:[]};pondVis();if(S.tut&&S.tut.done)return;if(S.tut&&S.tut.i!=null){TUT.on=true;TUT.i=S.tut.i;tutSkipDone();tutUI();return;}if(tanksN()<3)tutStart(false);else{S.tut={done:1};markDirty();setTimeout(()=>toast('📘 地圖裡有新的「新手教學」和「💰 收支表」',4200),3000);}},5500);
 setInterval(()=>{if(loaded)synTick();},2000);
-boot();
+

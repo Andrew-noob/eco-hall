@@ -51,18 +51,14 @@ box(22,.04,.12,new THREE.MeshBasicMaterial({color:C(0x4fc8ff)}),0,.03,-19.6);
 box(.08,1.2,16,wood,-35.96,.6,28);box(22,1.2,.08,wood,-25,.6,35.96);box(22,1.2,.08,wood,-25,.6,20.04);
 box(.1,.08,16,brass,-35.94,1.22,28);box(22,.08,.1,brass,-25,1.22,35.94);box(22,.08,.1,brass,-25,1.22,20.06);
 {const arch=new THREE.TorusGeometry(2.1,.18,10,32,Math.PI);arch.rotateY(Math.PI/2);add(arch,stoneD,-14.3,3.5,28);}
-for(const [x,z] of[[-33,22],[-17,22],[-33,34],[-17,34]])bigLeaves(scene,x,0,z,rnd(.9,1.3),0x3a7a32,8,true);
-OBST.push([-33.6,-32.4,21.4,22.6],[-17.6,-16.4,21.4,22.6],[-33.6,-32.4,33.4,34.6],[-17.6,-16.4,33.4,34.6]);
+/* （爬蟲館四角地上的植物已移除） */
 
 /* ---------- 溫室連廊（大廳→溫室，有頂棚） ---------- */
-for(let z=41.5;z<=55;z+=3.35){for(const sx of[-1,1]){add(new THREE.CylinderGeometry(.07,.07,3.4,12),metal,sx*2.4,1.7,z);OBST.push([sx*2.4-.15,sx*2.4+.15,z-.15,z+.15]);}box(5,.12,.12,metal,0,3.4,z);glow(0,3.2,z,1.1,0xfff0c8,.55);}
+/* 兩側全開：只留四角與前後段的柱子，中段（左右小路交會處 z≈48）不放柱子，可以直接往兩邊走 */
+for(let z=41.5;z<=55;z+=3.35){if(Math.abs(z-48.2)>.5)for(const sx of[-1,1]){add(new THREE.CylinderGeometry(.07,.07,3.4,12),metal,sx*2.4,1.7,z);OBST.push([sx*2.4-.12,sx*2.4+.12,z-.12,z+.12]);}box(5,.12,.12,metal,0,3.4,z);glow(0,3.2,z,1.1,0xfff0c8,.55);}
 for(const sx of[-1,1])box(.12,.12,15,metal,sx*2.4,3.4,48.3);
 const roof=add(new THREE.PlaneGeometry(5,15),doorGlass,0,3.45,48.3);roof.rotation.x=-Math.PI/2;
-const fl=['#e04a6a','#f0c040','#8a5ad8','#f08a3a','#ffffff'];
-const pmA=new THREE.MeshStandardMaterial({color:C(0x7a6a58),roughness:.8}),pmB=new THREE.MeshStandardMaterial({color:C(0x3a2a1c),roughness:1});
-for(const sx of[-1,1]){for(const [z0,z1] of[[41.3,46.6],[49.4,55.3]]){const zc=(z0+z1)/2,L=z1-z0;box(.6,.35,L,pmA,sx*3.1,.17,zc);box(.5,.06,L-.1,pmB,sx*3.1,.36,zc);OBST.push([sx*3.1-.35,sx*3.1+.35,z0,z1]);}
- const gs=[];for(let i=0;i<70;i++){const z=Math.random()<.5?rnd(41.5,46.4):rnd(49.6,55.1),x=sx*3.1+rnd(-.2,.2),h=rnd(.15,.35);gs.push(prim(cylBetween(V(x,.38,z),V(x,.38+h,z),.006,.004,4),C(0x3a7a2a)),prim(new THREE.SphereGeometry(rnd(.03,.05),8,6).translate(x,.38+h,z),C(fl[i%5])));}
- add(merge(gs),new THREE.MeshStandardMaterial({vertexColors:true,roughness:.6}),0,0,0);}
+/* （原本兩側的花台已移除，讓連廊左右可以自由進出庭園） */
 
 /* ---------- 溫室入口門廊與磚牆基座 ---------- */
 const bt=rep(brick,6,1),bm2=new THREE.MeshStandardMaterial({map:bt,roughness:.85});

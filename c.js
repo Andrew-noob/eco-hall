@@ -393,7 +393,7 @@ let S={v:2,t:Date.now(),nid:1,tanks:{}},docRef=null,saving=false,dirty=false,loa
 function markDirty(){dirty=true;}
 async function save(){if((typeof VISIT!=='undefined'&&VISIT)||!loaded||saving||!dirty)return;dirty=false;saving=true;S.t=Date.now();const data=JSON.parse(JSON.stringify(S));
  try{if(docRef)await docRef.set(data);else localStorage.setItem('museum-v2',JSON.stringify(data));}catch(e){try{localStorage.setItem('museum-v2',JSON.stringify(data));}catch(_){}}saving=false;}
-setInterval(save,5000);setInterval(()=>{if(loaded&&Object.keys(S.tanks).length)dirty=true;},90000);
+setInterval(save,5000);addEventListener('visibilitychange',()=>{if(document.hidden&&loaded){dirty=true;save();}});addEventListener('pagehide',()=>{if(loaded){dirty=true;save();}});setInterval(()=>{if(loaded&&Object.keys(S.tanks).length)dirty=true;},90000);
 function applyOffline(){const el=clamp((Date.now()-(S.t||Date.now()))/1000,0,7*86400);if(el<60)return;
  for(const id in S.tanks){const st=ensureSt(S.tanks[id]);st.clean=Math.max(0,(st.clean??100)-.02*.05*el);const d=ENVDEF[st.type];if(d&&d.hb!=null)st.hum=d.hb+(st.hum-d.hb)*Math.exp(-el*.002);
   for(const e of st.animals){const fedRatio=clamp(e.hunger/60,0,1);if(e.size<1&&!SP[e.sp].school)e.size=Math.min(1,e.size+GROW*.3*el*fedRatio);e.hunger=Math.max(5,e.hunger-SP[e.sp].hr*.05*el);}}
@@ -561,25 +561,38 @@ $('#pAct').onclick=()=>{if(!sel)return;const e=sel.entry;if(Date.now()-(e._ia||0
    ================================================================= */
 let ZOOM=1;function resize(){const w=innerWidth,h=innerHeight;renderer.setSize(w,h);camera.aspect=w/h;const base=w<h?60:50;camera.fov=2*Math.atan(Math.tan(base*Math.PI/360)/ZOOM)*180/Math.PI;camera.updateProjectionMatrix();}
 const clock=new THREE.Clock();let bob=0,uiT=0,brT=0,dayT=99;
-function loop(){requestAnimationFrame(loop);const dt=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;T.value=t;
+const DIRTC=C(0x4a5a2a),_fr=new THREE.Frustum(),_pm=new THREE.Matrix4(),_lp=new THREE.Vector3(),_sp=new THREE.Sphere();
+/* 遠處或畫面外的展缸：動物降低更新頻率（看不到也省電），近的照常每格更新 */
+function tkLod(tk,cp){const b=tk._bs;if(!b)return 1;const d=b.center.distanceTo(cp)-b.radius;_sp.center.copy(b.center);_sp.radius=b.radius+1.5;const inF=_fr.intersectsSphere(_sp);return inF?(d<20?1:2):4;}
+/* 120Hz／90Hz 手機最多畫 60 格（看起來一樣順，但省一半電、不容易發燙）；高畫質模式不限 */
+let lastF=0;const FCAP=()=>{try{return localStorage.getItem('eh-q')!=='high';}catch(e){return true;}};let fcap=FCAP();setInterval(()=>{fcap=FCAP();},3000);
+function loop(){requestAnimationFrame(loop);const now=performance.now();if(fcap&&now-lastF<12.5)return;lastF=Math.min(now,Math.max(lastF+16.667,now-16.667));
+ const dt=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;T.value=t;
+ try{
  const m=movePlayer(dt);bob+=dt*m*8;camera.position.set(player.x,player.y+1.6+Math.sin(bob)*.022*m,player.z);camera.rotation.set(player.pitch,player.yaw,0,'YXZ');
+ camera.updateMatrixWorld();_pm.multiplyMatrices(camera.projectionMatrix,camera.matrixWorldInverse);_fr.setFromProjectionMatrix(_pm);const cp=camera.position;
  dayT+=dt;if(dayT>20){dayT=0;updDay();}brT+=dt;const doBreed=brT>45;if(doBreed)brT=0;
- for(const id in TANKS){const tk=TANKS[id],st=tk.st,s=tk.slot;
-  if(s.sz==='C'||s.sz==='T'){const c=s.origin.clone().addScaledVector(s.f,-tk.r),dx=camera.position.x-c.x,dz=camera.position.z-c.z,l=Math.hypot(dx,dz)||1;tk.u.n.value.set(dx/l,0,dz/l);tk.u.d.value=(dx*c.x+dz*c.z)/l+tk.r;}
-  tk.attract=null;if(near===s&&!['XL','U'].includes(s.sz)&&loaded){const lp=tk.group.worldToLocal(V(player.x,player.y+1.4,player.z));
+ for(const id in TANKS){const tk=TANKS[id],st=tk.st,s=tk.slot;try{
+  if(s.sz==='C'||s.sz==='T'){const c=s.origin.clone().addScaledVector(s.f,-tk.r),dx=cp.x-c.x,dz=cp.z-c.z,l=Math.hypot(dx,dz)||1;tk.u.n.value.set(dx/l,0,dz/l);tk.u.d.value=(dx*c.x+dz*c.z)/l+tk.r;}
+  tk.attract=null;if(near===s&&!['XL','U'].includes(s.sz)&&loaded){const lp=tk.group.worldToLocal(_lp.set(player.x,player.y+1.4,player.z));
    if(tk.cyl){const dx=lp.x,dz=lp.z-tk.cz,l=Math.hypot(dx,dz)||1;tk.attract=V(dx/l*tk.r*.62,clamp(lp.y,tk.box.min.y+.1,tk.box.max.y-.1),tk.cz+dz/l*tk.r*.62);}
    else if(tk.box&&!tk.walk){const b=tk.box,p=b.clampPoint(lp,V());if(s.sz==='PD'||s.sz==='R')p.y=b.max.y-.08;else p.z=b.max.z-.02;if(tk.confine)tk.confine(p,.4);tk.attract=p;}
    else if(tk.walk){const p=tk.walk.clampPoint(lp,V());if((s.sz!=='PEN'&&s.sz!=='AV'))p.z=tk.walk.max.z-.04;p.y=tk.groundY(p.x,p.z);tk.attract=p;}}
-  if(tk.group.visible!==false){for(const c of tk.creatures){c.update(dt,t);if(c.beg>0)c.beg-=dt;}for(const a of tk.anims)a(t,dt);if(tk.food)tk.food.update(dt,t);if(tk.tfood)tk.tfood.update(dt,t);}
+  tk._acc=(tk._acc||0)+dt;
+  if(tk.group.visible!==false){const N=near===s?1:tkLod(tk,cp);tk._fc=((tk._fc||0)+1)%N;
+   if(tk._fc===0){const d2=Math.min(tk._acc,.12);tk._acc=0;for(const c of tk.creatures){c.update(d2,t);if(c.beg>0)c.beg-=d2;}for(const a of tk.anims)a(t,d2);if(tk.food)tk.food.update(d2,t);if(tk.tfood)tk.tfood.update(d2,t);}}
+  else tk._acc=0;
   st.clean=Math.max(0,st.clean-.015*dt);const dirt=1-st.clean/100;const d=ENVDEF[st.type];if(d&&d.hb!=null)st.hum+=(d.hb-st.hum)*dt*.002;
-  if(tk.u){tk.u.wc.value.copy(tk.wc0).lerp(C(0x4a5a2a),dirt*.6);tk.u.den.value=tk.den0*(1+dirt*1.6);}if(tk.smudge){tk.fogT=Math.max(0,(tk.fogT||0)-dt*.08);tk.smudge.material.opacity=Math.max(dirt*.32,tk.fogT*.35);tk.smudge.material.color.setRGB(.6+.35*tk.fogT,.6+.35*tk.fogT,.5+.45*tk.fogT);}
+  if(tk.u){tk.u.wc.value.copy(tk.wc0).lerp(DIRTC,dirt*.6);tk.u.den.value=tk.den0*(1+dirt*1.6);}if(tk.smudge){tk.fogT=Math.max(0,(tk.fogT||0)-dt*.08);tk.smudge.material.opacity=Math.max(dirt*.32,tk.fogT*.35);tk.smudge.material.color.setRGB(.6+.35*tk.fogT,.6+.35*tk.fogT,.5+.45*tk.fogT);}
   const over=used(tk)>SZ[s.sz].cap;
   for(const c of tk.creatures){const e=c.entry;e.hunger=Math.max(0,e.hunger-SP[e.sp].hr*dt);e.mood=lerp(e.mood??80,moodTarget(st,e,over),Math.min(1,dt*.2));
    if(e.size<1&&!SP[e.sp].school&&e.hunger>40){const o=stage(e);e.size=Math.min(1,e.size+GROW*dt);applySize(c);const n=stage(e);if(n!==o){logEv(st,`${e.name} 長成${n}了`);toast(`🌱 ${e.name} 長成${n}了！`);markDirty();}}
    if((e.fed||0)>c._fed){if(tk.tfood&&SP[e.sp].diet)(c._pq=c._pq||[]).push(t+rnd(40,110));c._fed=e.fed;}
    if(c._pq&&c._pq.length&&t>c._pq[0]){c._pq.shift();const p=c.pickPos().clone();p.x+=rnd(-.04,.04);p.z+=rnd(-.04,.04);tk.tfood.addPoop(p,SP[e.sp].ps||1);st.clean=Math.max(0,st.clean-4);}}
-  if(doBreed)checkBreed(tk);}
- for(const a of globalAnims)a(t,dt);updFx(dt);
- uiT+=dt;if(uiT>.3){uiT=0;if(loaded)bar();updPick();}
+  if(doBreed)checkBreed(tk);}catch(e){errLog(e,'tank '+id);}}
+ for(const a of globalAnims){if(a._off)continue;try{a(t,dt);}catch(e){errLog(e,'anim');a._e=(a._e||0)+1;if(a._e>40)a._off=1;}}
+ try{updFx(dt);}catch(e){errLog(e,'fx');}
+ uiT+=dt;if(uiT>.3){uiT=0;try{if(loaded)bar();updPick();}catch(e){errLog(e,'ui');}}
+ }catch(e){errLog(e,'loop');}
  renderer.render(scene,camera);}
 function boot(){addEventListener('resize',resize);resize();updDay();toast('讀取你的生態館…',2000);load();loop();}

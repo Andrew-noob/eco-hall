@@ -58,6 +58,9 @@ html,body{margin:0;height:100%;background:#05080b;color:var(--txt);font-family:-
 </style>
 </head>
 <body>
+<div id="ld" style="position:fixed;inset:0;z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#05080b;color:#94a8b4;font-size:13px;transition:opacity .5s"><div style="font-size:24px;color:#eaf2f6;font-weight:700;margin-bottom:12px">🐠 生態館</div><div id="ldT">載入中…</div><div style="width:190px;height:4px;background:rgba(255,255,255,.1);border-radius:2px;margin-top:10px;overflow:hidden"><i id="ldB" style="display:block;height:100%;width:3%;background:#6fd3ff;transition:width .2s"></i></div></div>
+<script>(function(){var n=0;document.addEventListener('load',function(e){var t=e.target;if(t&&t.tagName==='SCRIPT'){n++;var b=document.getElementById('ldB');if(b)b.style.width=Math.min(100,Math.round(n/30*100))+'%';}},true);
+setTimeout(function(){var t=document.getElementById('ldT');if(t&&document.getElementById('ld'))t.textContent='載入有點久…網路慢的話再等一下，卡住就重新整理';},20000);})();</script>
 <canvas id="c"></canvas>
 <div class="vig"></div>
 <div class="top"><div class="chips" id="chips"></div></div>
@@ -77,34 +80,35 @@ html,body{margin:0;height:100%;background:#05080b;color:var(--txt);font-family:-
 <div class="toast" id="toast"></div>
 <div id="err">3D 引擎載入失敗，請檢查網路後重新整理。</div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script>if(!window.THREE)document.getElementById('err').style.display='flex';</script>
-<script src="a.js?v=27"></script>
-<script src="b.js?v=27"></script>
-<script src="c.js?v=27"></script>
-<script src="d.js?v=27"></script>
-<script src="e.js?v=27"></script>
-<script src="f.js?v=27"></script>
-<script src="g.js?v=27"></script>
-<script src="h.js?v=27"></script>
-<script src="i.js?v=27"></script>
-<script src="j.js?v=27"></script>
-<script src="k.js?v=27"></script>
-<script src="l.js?v=27"></script>
-<script src="m.js?v=27"></script>
-<script src="n.js?v=27"></script>
-<script src="o.js?v=27"></script>
-<script src="p.js?v=27"></script>
-<script src="q.js?v=27"></script>
-<script src="r.js?v=27"></script>
-<script src="s.js?v=27"></script>
-<script src="t.js?v=27"></script>
-<script src="u.js?v=27"></script>
-<script src="v.js?v=27"></script>
-<script src="w.js?v=27"></script>
-<script src="x.js?v=27"></script>
-<script src="y.js?v=27"></script>
-<script src="z.js?v=27"></script>
-<script src="za.js?v=27"></script>
-<script src="zb.js?v=27"></script>
+<script>if(!window.THREE){document.getElementById('err').style.display='flex';var l=document.getElementById('ld');if(l)l.remove();}</script>
+<script src="a.js?v=28"></script>
+<script src="b.js?v=28"></script>
+<script src="c.js?v=28"></script>
+<script src="d.js?v=28"></script>
+<script src="e.js?v=28"></script>
+<script src="f.js?v=28"></script>
+<script src="g.js?v=28"></script>
+<script src="h.js?v=28"></script>
+<script src="i.js?v=28"></script>
+<script src="j.js?v=28"></script>
+<script src="k.js?v=28"></script>
+<script src="l.js?v=28"></script>
+<script src="m.js?v=28"></script>
+<script src="n.js?v=28"></script>
+<script src="o.js?v=28"></script>
+<script src="p.js?v=28"></script>
+<script src="q.js?v=28"></script>
+<script src="r.js?v=28"></script>
+<script src="s.js?v=28"></script>
+<script src="t.js?v=28"></script>
+<script src="u.js?v=28"></script>
+<script src="v.js?v=28"></script>
+<script src="w.js?v=28"></script>
+<script src="x.js?v=28"></script>
+<script src="y.js?v=28"></script>
+<script src="z.js?v=28"></script>
+<script src="za.js?v=28"></script>
+<script src="zb.js?v=28"></script>
+<script src="zc.js?v=28"></script>
 </body>
 </html>

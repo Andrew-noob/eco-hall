@@ -12,7 +12,7 @@ function perfBuild(){PERF.lights=[];scene.traverse(o=>{if(o.isPointLight||o.isSp
  for(const o of scene.children){if(o===camera||o.isLight||o.userData.dyn||!o.visible)continue;b.setFromObject(o);if(b.isEmpty())continue;b.getBoundingSphere(sp);if(sp.radius>9)continue;PERF.cull.push({o,off:sp.center.clone().sub(o.position),r:sp.radius});}PERF.built=true;}
 function perfCull(){if(!PERF.built)return;const cd=perfQ().cd,cp=camera.position;const show=(o,c,r)=>{const far=c.distanceTo(cp)-r>cd;if(far){if(o.visible){o.visible=false;o.userData._cull=1;}}else if(o.userData._cull){o.visible=true;o.userData._cull=0;}};
  const tmp=new THREE.Vector3();for(const x of PERF.cull){if(!x.o.parent)continue;show(x.o,tmp.copy(x.o.position).add(x.off),x.r);}
- if(typeof WV!=='undefined'&&WV.g){const d=Math.hypot(cp.x-(WG.x+8),cp.z-WG.z);WV.g.visible=d<cd+22;}
+ if(typeof WV!=='undefined'&&WV.g){const d=Math.hypot(cp.x-(WG.x+8),cp.z-WG.z);const v=d<cd+22;WV.g.visible=v;WV.g.userData._cull=v?0:1;}
  for(const id in TANKS){const tk=TANKS[id];if(!tk.group)continue;if(!tk._bs){const b=new THREE.Box3().setFromObject(tk.group);if(b.isEmpty())continue;tk._bs=b.getBoundingSphere(new THREE.Sphere());}show(tk.group,tk._bs.center,tk._bs.radius);}}
 /* 傳送後馬上重新判斷要畫什麼，不用等 */
 let pfLast=null;globalAnims.push(()=>{if(!PERF.built)return;const cp=camera.position;if(pfLast&&cp.distanceTo(pfLast)>6){perfCull();perfLights();}pfLast=(pfLast||new THREE.Vector3()).copy(cp);});
@@ -25,4 +25,3 @@ function perfSheet(){sheet('⚡ 畫質與效能',`<div class="mut sm" style="mar
  Object.entries(PQ).map(([k,q])=>`<button class="opt" data-q="${k}"><b>${PERF.q===k?'✅ ':''}${q.n}</b><span class="mut">${k==='auto'?'卡的時候自動降低解析度（推薦）':k==='low'?'最順，畫面比較糊，遠的東西比較早消失':'最漂亮，適合新手機'}</span></button>`).join(''),
  c=>c.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{PERF.q=b.dataset.q;try{localStorage.setItem('eh-q',PERF.q);}catch(e){}perfApply();perfLights();perfCull();toast(`⚡ 畫質：${perfQ().n}`,1600);perfSheet();}));}
 const _msP=mapSheet;mapSheet=function(){_msP();const c=$('#shC');if(!c)return;const b=document.createElement('button');b.className='btn';b.style.cssText='width:100%;margin-top:6px';b.textContent=`⚡ 畫質：${perfQ().n}（${Math.round(PERF.fps)} FPS）`;b.onclick=perfSheet;c.appendChild(b);};
-boot();

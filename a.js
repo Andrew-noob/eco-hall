@@ -10,7 +10,12 @@ const nz=(x,y,z)=>Math.sin(x*1.7+Math.sin(z*1.3))*.5+Math.sin(z*2.9+y*1.1+x*.7)*
 const sstep=t=>t*t*(3-2*t);
 
 const canvas=$('#c');
-const renderer=new THREE.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance'});
+/* 錯誤紀錄：某個功能出錯時只跳過它，不讓整個畫面當掉（地圖 → 畫質 可以看到紀錄） */
+const ERRS=(()=>{try{return JSON.parse(localStorage.getItem('eh-err')||'[]').map(e=>Object.assign(e,{old:1}));}catch(e){return [];}})();
+function errLog(e,w){try{const m=String((e&&e.message)||e).slice(0,140),st=String((e&&e.stack)||'').split('\n').slice(1,3).map(x=>x.trim().replace(/^at /,'').replace(/\(?https?:\/\/[^\s)]*\/([^\/\s)]+)\)?/,'$1')).join(' ← ').slice(0,160),k=m+'|'+st;
+ const f=ERRS.find(x=>x.k===k&&!x.old);if(f){f.n++;return;}ERRS.push({k,m,st,w:w||'',n:1,t:Date.now()});while(ERRS.length>10)ERRS.shift();try{localStorage.setItem('eh-err',JSON.stringify(ERRS.slice(-8)));}catch(_){}console.warn('[生態館]',w,e);}catch(_){}}
+addEventListener('error',ev=>errLog(ev.error||ev.message,'win'));addEventListener('unhandledrejection',ev=>errLog(ev.reason,'async'));
+const renderer=new THREE.WebGLRenderer({canvas,antialias:(()=>{try{return localStorage.getItem('eh-q')!=='low';}catch(e){return true;}})(),powerPreference:'high-performance'});
 renderer.setPixelRatio(Math.min(devicePixelRatio,1.75));
 renderer.outputEncoding=THREE.sRGBEncoding;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.1;
 const scene=new THREE.Scene();scene.background=C(0x05080b);
